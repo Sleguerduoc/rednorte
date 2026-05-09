@@ -1,12 +1,15 @@
 import { NavLink } from "react-router-dom";
 import StatusMessage from "../components/feedback/StatusMessage";
+import rednorteLogo from "../assets/rednorte-logo.png";
 
 function AppLayout({ cargandoDatos, children, mensaje, onActualizar }) {
   return (
     <div className="app">
       <aside className="sidebar">
-        <h2>RedNorte</h2>
-        <p>Gestion hospitalaria</p>
+        <div className="brand-card">
+          <img src={rednorteLogo} alt="RedNorte" />
+        </div>
+        <p className="brand-tagline">Conectamos posibilidades</p>
         <nav>
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/pacientes">Pacientes</NavLink>
