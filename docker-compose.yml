@@ -1,0 +1,61 @@
+services:
+  postgres-pacientes:
+    image: postgres:16
+    container_name: postgres-pacientes
+    environment:
+      POSTGRES_DB: pacientes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pacientes_data:/var/lib/postgresql/data
+
+  postgres-lista:
+    image: postgres:16
+    container_name: postgres-lista
+    environment:
+      POSTGRES_DB: lista_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - lista_data:/var/lib/postgresql/data
+
+  postgres-reasignacion:
+    image: postgres:16
+    container_name: postgres-reasignacion
+    environment:
+      POSTGRES_DB: reasignacion_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - reasignacion_data:/var/lib/postgresql/data
+
+  postgres-notificaciones:
+    image: postgres:16
+    container_name: postgres-notificaciones
+    environment:
+      POSTGRES_DB: notificaciones_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - notificaciones_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-rednorte
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  pacientes_data:
+  lista_data:
+  reasignacion_data:
+  notificaciones_data:
