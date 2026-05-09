@@ -43,8 +43,15 @@ function App() {
   };
 
   const crearPaciente = async (e) => {
-    e.preventDefault();
-    await axios.post(`${API_URL}/pacientes`, pacienteForm);
+  e.preventDefault();
+
+  try {
+    const response = await axios.post(`${API_URL}/pacientes`, pacienteForm);
+
+    console.log("Paciente creado:", response.data);
+
+    setPacientes((prev) => [...prev, response.data]);
+
     setPacienteForm({
       rut: "",
       nombre: "",
@@ -52,8 +59,13 @@ function App() {
       telefono: "",
       direccion: ""
     });
-    cargarDatos();
-  };
+
+    await cargarDatos();
+  } catch (error) {
+    console.error("Error creando paciente:", error);
+    alert("No se pudo crear el paciente. Revisa la consola.");
+  }
+};
 
   const crearSolicitud = async (e) => {
     e.preventDefault();
