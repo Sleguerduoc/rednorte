@@ -10,7 +10,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/reasignaciones")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ReasignacionController {
 
     private final ReasignacionRepository repository;
