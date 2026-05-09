@@ -276,6 +276,33 @@ button.compact {
   gap: 10px;
 }
 
+.list-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.list-header {
+  align-items: center;
+  color: #526173;
+  display: flex;
+  font-size: 13px;
+  justify-content: space-between;
+}
+
+.list-header strong {
+  background: #eef5fb;
+  border-radius: 999px;
+  color: #104e7a;
+  padding: 4px 9px;
+}
+
+.scroll-list {
+  max-height: min(58vh, 620px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .record-row,
 .notification,
 .timeline-item {
@@ -422,7 +449,13 @@ button.compact {
 }
 
 .table-wrap {
-  overflow-x: auto;
+  overflow: auto;
+}
+
+.scroll-table {
+  max-height: min(58vh, 620px);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
 }
 
 table {
@@ -445,7 +478,10 @@ th {
   background: #f8fafc;
   color: #334155;
   font-size: 12px;
+  position: sticky;
+  top: 0;
   text-transform: uppercase;
+  z-index: 1;
 }
 
 td strong {
