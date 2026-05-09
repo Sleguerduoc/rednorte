@@ -1,0 +1,186 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f7fb;
+  color: #172033;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: #0b4f8a;
+  color: white;
+  padding: 28px 22px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.sidebar h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.sidebar p {
+  opacity: 0.8;
+  margin-bottom: 30px;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 12px;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.main {
+  margin-left: 260px;
+  padding: 32px;
+  width: calc(100% - 260px);
+}
+
+.hero {
+  background: white;
+  padding: 28px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  color: #0b4f8a;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.card span {
+  color: #64748b;
+}
+
+.card strong {
+  display: block;
+  font-size: 34px;
+  margin-top: 8px;
+  color: #0b4f8a;
+}
+
+.panel {
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.panel h2 {
+  margin-top: 0;
+  color: #0b4f8a;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+input,
+select {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+button {
+  padding: 12px 18px;
+  background: #0b4f8a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #083b68;
+}
+
+button.danger {
+  background: #b42318;
+  margin-bottom: 18px;
+}
+
+button.danger:hover {
+  background: #8f1d14;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: #f8fafc;
+  color: #334155;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+  }
+
+  .app {
+    display: block;
+  }
+
+  .main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .cards,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
