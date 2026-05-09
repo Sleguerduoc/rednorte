@@ -3,6 +3,7 @@ package cl.rednorte.reasignacion.config;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 
 @Configuration
 public class RabbitConfig {
@@ -19,4 +20,8 @@ public class RabbitConfig {
     public Queue notificacionSolicitadaQueue() {
         return new Queue(COLA_NOTIFICACION_SOLICITADA, true);
     }
+    @Bean
+    public Jackson2JsonMessageConverter jsonMessageConverter() {
+    return new Jackson2JsonMessageConverter();
+}
 }
