@@ -10,7 +10,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/notificaciones")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class NotificacionController {
 
     private final NotificacionRepository repository;
