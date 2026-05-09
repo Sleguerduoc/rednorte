@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>cl.rednorte</groupId>
-	<artifactId>servicio-reasignacion</artifactId>
+	<artifactId>servicio-notificaciones</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
