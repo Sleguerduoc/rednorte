@@ -29,12 +29,24 @@ public class ReasignacionService {
 
         repository.save(reasignacion);
 
-        NotificacionSolicitadaEvent notificacion = NotificacionSolicitadaEvent.builder()
+        String mensaje = "Se ha liberado una cita para "
+        + evento.getEspecialidad()
+        + " en la fecha "
+        + evento.getFecha();
+
+        NotificacionSolicitadaEvent notificacionEmail = NotificacionSolicitadaEvent.builder()
                 .pacienteId(1L)
                 .canal("EMAIL")
-                .mensaje("Se ha liberado una cita para " + evento.getEspecialidad() + " en la fecha " + evento.getFecha())
+                .mensaje(mensaje)
                 .build();
 
-        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA, notificacion);
+        NotificacionSolicitadaEvent notificacionSms = NotificacionSolicitadaEvent.builder()
+                .pacienteId(1L)
+                .canal("SMS")
+                .mensaje(mensaje)
+                .build();
+
+        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA, notificacionEmail);
+        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA, notificacionSms);
     }
 }
