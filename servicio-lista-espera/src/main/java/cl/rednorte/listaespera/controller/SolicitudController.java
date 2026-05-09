@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/listas-espera")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class SolicitudController {
 
     private final SolicitudService service;
