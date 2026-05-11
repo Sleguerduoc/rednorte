@@ -1,51 +1,54 @@
+import PropTypes from "prop-types";
 import { fechaDesdeSolicitud, formatearFecha } from "../../utils/date";
 import { normalizar } from "../../utils/text";
 import ListHeader from "../common/ListHeader";
 
 function CitasTable({ cancelarCita, cancelandoCitaId, citasFiltradas }) {
   return (
-    <section className="list-section">
+    <div>
       <ListHeader count={citasFiltradas.length} label="Citas disponibles" />
-      <div className="table-wrap scroll-table">
-        <table>
+      <div className="rn-table-wrap">
+        <table className="rn-table">
           <thead>
             <tr>
-              <th>Cita</th>
+              <th>ID</th>
               <th>Paciente</th>
               <th>Especialidad</th>
               <th>Fecha</th>
               <th>Prioridad</th>
-              <th>Accion</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
             {citasFiltradas.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="empty">No hay citas para mostrar.</td>
+              <tr className="rn-empty-row">
+                <td colSpan="6">No hay citas para mostrar.</td>
               </tr>
             ) : (
               citasFiltradas.map((solicitud) => (
                 <tr key={solicitud.id}>
-                  <td>#{solicitud.id}</td>
+                  <td className="rn-td-id">#{solicitud.id}</td>
                   <td>
-                    <strong>{solicitud.paciente?.nombre || `Paciente ${solicitud.pacienteId}`}</strong>
-                    <span className="muted">{solicitud.paciente?.rut || "Sin RUT"}</span>
+                    <div className="rn-td-name">
+                      {solicitud.paciente?.nombre || `Paciente ${solicitud.pacienteId}`}
+                    </div>
+                    <div className="rn-td-sub">{solicitud.paciente?.rut || "Sin RUT"}</div>
                   </td>
                   <td>{solicitud.especialidad}</td>
-                  <td>{formatearFecha(fechaDesdeSolicitud(solicitud))}</td>
+                  <td className="rn-td-id">{formatearFecha(fechaDesdeSolicitud(solicitud))}</td>
                   <td>
-                    <span className={`priority priority-${normalizar(solicitud.prioridad)}`}>
+                    <span className={`rn-badge rn-badge--${normalizar(solicitud.prioridad)}`}>
                       {solicitud.prioridad}
                     </span>
                   </td>
                   <td>
                     <button
                       type="button"
-                      className="danger compact"
+                      className="rn-btn rn-btn--danger"
                       disabled={cancelandoCitaId === solicitud.id}
                       onClick={() => cancelarCita(solicitud)}
                     >
-                      {cancelandoCitaId === solicitud.id ? "Cancelando..." : "Cancelar cita"}
+                      {cancelandoCitaId === solicitud.id ? "Cancelando…" : "Cancelar"}
                     </button>
                   </td>
                 </tr>
@@ -54,8 +57,14 @@ function CitasTable({ cancelarCita, cancelandoCitaId, citasFiltradas }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </div>
   );
 }
+
+CitasTable.propTypes = {
+  cancelarCita:     PropTypes.func.isRequired,
+  cancelandoCitaId: PropTypes.number,
+  citasFiltradas:   PropTypes.array.isRequired,
+};
 
 export default CitasTable;

@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import SolicitudForm from "../components/solicitudes/SolicitudForm";
 import TablaSolicitudes from "../components/solicitudes/TablaSolicitudes";
 
@@ -13,34 +14,51 @@ function ListaEsperaPage({
   pacientesParaSolicitud,
   seleccionarPacienteSolicitud,
   setBusquedaSolicitud,
-  solicitudesActivas
+  solicitudesActivas,
 }) {
   return (
-    <section className="panel">
-      <div className="section-header">
+    <div className="rn-panel">
+      <div className="rn-panel__head">
         <div>
-          <h2>Lista de espera</h2>
-          <p>Busca al paciente, seleccionalo y registra la especialidad requerida.</p>
+          <h2 className="rn-panel__title">Lista de espera</h2>
+          <p className="rn-panel__sub">Busca al paciente, selecciónalo y registra la especialidad requerida.</p>
         </div>
       </div>
 
-      <SolicitudForm
-        actualizarLista={actualizarLista}
-        busquedaSolicitud={busquedaSolicitud}
-        crearSolicitud={crearSolicitud}
-        erroresLista={erroresLista}
-        guardandoSolicitud={guardandoSolicitud}
-        listaForm={listaForm}
-        pacienteSeleccionado={pacienteSeleccionado}
-        pacientesLength={pacientesLength}
-        pacientesParaSolicitud={pacientesParaSolicitud}
-        seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
-        setBusquedaSolicitud={setBusquedaSolicitud}
-      />
+      <div className="rn-panel__body">
+        <SolicitudForm
+          actualizarLista={actualizarLista}
+          busquedaSolicitud={busquedaSolicitud}
+          crearSolicitud={crearSolicitud}
+          erroresLista={erroresLista}
+          guardandoSolicitud={guardandoSolicitud}
+          listaForm={listaForm}
+          pacienteSeleccionado={pacienteSeleccionado}
+          pacientesLength={pacientesLength}
+          pacientesParaSolicitud={pacientesParaSolicitud}
+          seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
+          setBusquedaSolicitud={setBusquedaSolicitud}
+        />
+      </div>
 
       <TablaSolicitudes solicitudes={solicitudesActivas} />
-    </section>
+    </div>
   );
 }
+
+ListaEsperaPage.propTypes = {
+  actualizarLista:              PropTypes.func.isRequired,
+  busquedaSolicitud:            PropTypes.string.isRequired,
+  crearSolicitud:               PropTypes.func.isRequired,
+  erroresLista:                 PropTypes.object.isRequired,
+  guardandoSolicitud:           PropTypes.bool.isRequired,
+  listaForm:                    PropTypes.object.isRequired,
+  pacienteSeleccionado:         PropTypes.object,
+  pacientesLength:              PropTypes.number.isRequired,
+  pacientesParaSolicitud:       PropTypes.array.isRequired,
+  seleccionarPacienteSolicitud: PropTypes.func.isRequired,
+  setBusquedaSolicitud:         PropTypes.func.isRequired,
+  solicitudesActivas:           PropTypes.array.isRequired,
+};
 
 export default ListaEsperaPage;

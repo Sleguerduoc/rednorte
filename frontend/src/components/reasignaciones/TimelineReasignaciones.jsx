@@ -1,31 +1,41 @@
+import PropTypes from "prop-types";
 import { formatearFecha } from "../../utils/date";
 import ListHeader from "../common/ListHeader";
 
 function TimelineReasignaciones({ pacientesPorId, reasignaciones }) {
   return (
-    <section className="list-section">
+    <div>
       <ListHeader count={reasignaciones.length} label="Reasignaciones" />
-      <div className="timeline scroll-list">
+      <div className="rn-timeline">
         {reasignaciones.length === 0 ? (
-          <div className="empty">No hay reasignaciones registradas.</div>
+          <div className="rn-empty">No hay reasignaciones registradas.</div>
         ) : (
-          reasignaciones.slice().reverse().map((reasignacion) => {
-            const paciente = pacientesPorId.get(Number(reasignacion.pacienteId));
-
+          reasignaciones.slice().reverse().map((r) => {
+            const paciente = pacientesPorId.get(Number(r.pacienteId));
             return (
-              <article className="timeline-item" key={reasignacion.id}>
-                <strong>{reasignacion.especialidad}</strong>
-                <span>
-                  Cita #{reasignacion.citaId} - {paciente?.nombre || `Paciente ${reasignacion.pacienteId || "sin asignar"}`} - {formatearFecha(reasignacion.fecha)}
-                </span>
-                <span className="badge">{reasignacion.estado}</span>
-              </article>
+              <div className="rn-tl-item" key={r.id}>
+                <div className="rn-tl-item__dot">#{r.citaId}</div>
+                <div className="rn-tl-item__body">
+                  <div className="rn-tl-item__title">{r.especialidad}</div>
+                  <div className="rn-tl-item__desc">
+                    {paciente?.nombre || `Paciente ${r.pacienteId || "sin asignar"}`}
+                    {" · "}
+                    <span className={`rn-badge rn-badge--default`}>{r.estado}</span>
+                  </div>
+                </div>
+                <div className="rn-tl-item__date">{formatearFecha(r.fecha)}</div>
+              </div>
             );
           })
         )}
       </div>
-    </section>
+    </div>
   );
 }
+
+TimelineReasignaciones.propTypes = {
+  pacientesPorId: PropTypes.instanceOf(Map).isRequired,
+  reasignaciones: PropTypes.array.isRequired,
+};
 
 export default TimelineReasignaciones;

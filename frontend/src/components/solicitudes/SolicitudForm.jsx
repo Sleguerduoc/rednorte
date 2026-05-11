@@ -1,5 +1,15 @@
+import PropTypes from "prop-types";
 import EspecialidadPicker from "./EspecialidadPicker";
 import PacienteFinder from "./PacienteFinder";
+
+function initials(nombre) {
+  return String(nombre || "?")
+    .split(" ")
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+}
 
 function SolicitudForm({
   actualizarLista,
@@ -12,42 +22,88 @@ function SolicitudForm({
   pacientesLength,
   pacientesParaSolicitud,
   seleccionarPacienteSolicitud,
-  setBusquedaSolicitud
+  setBusquedaSolicitud,
 }) {
   return (
-    <form onSubmit={crearSolicitud} className="split-form" noValidate>
-      <PacienteFinder
-        actualizarLista={actualizarLista}
-        busquedaSolicitud={busquedaSolicitud}
-        erroresLista={erroresLista}
-        listaForm={listaForm}
-        pacientesParaSolicitud={pacientesParaSolicitud}
-        seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
-        setBusquedaSolicitud={setBusquedaSolicitud}
-      />
+    <form onSubmit={crearSolicitud} className="rn-split-form" noValidate>
+      {/* Columna izquierda: buscador */}
+      <div className="rn-split-form__left">
+        <PacienteFinder
+          actualizarLista={actualizarLista}
+          busquedaSolicitud={busquedaSolicitud}
+          erroresLista={erroresLista}
+          listaForm={listaForm}
+          pacientesParaSolicitud={pacientesParaSolicitud}
+          seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
+          setBusquedaSolicitud={setBusquedaSolicitud}
+        />
 
-      <div className="request-fields">
         {pacienteSeleccionado && (
-          <div className="selected-patient">
-            <span>Paciente seleccionado</span>
-            <strong>{pacienteSeleccionado.nombre}</strong>
+          <div className="rn-sel-patient">
+            <div className="rn-sel-patient__av">{initials(pacienteSeleccionado.nombre)}</div>
+            <div className="rn-sel-patient__info">
+              <div className="rn-sel-patient__name">{pacienteSeleccionado.nombre}</div>
+              <div className="rn-sel-patient__rut">{pacienteSeleccionado.rut}</div>
+            </div>
           </div>
         )}
-        <EspecialidadPicker actualizarLista={actualizarLista} erroresLista={erroresLista} listaForm={listaForm} />
-        <label>
-          <span>Prioridad</span>
-          <select value={listaForm.prioridad} onChange={(e) => actualizarLista("prioridad", e.target.value)}>
-            <option value="NORMAL">Normal</option>
-            <option value="ALTA">Alta</option>
-            <option value="CRITICA">Critica</option>
-          </select>
-        </label>
-        <button type="submit" disabled={guardandoSolicitud || pacientesLength === 0}>
-          {guardandoSolicitud ? "Registrando..." : "Agregar a lista"}
+      </div>
+
+      {/* Columna derecha: especialidad + prioridad + submit */}
+      <div className="rn-split-form__right">
+        <EspecialidadPicker
+          actualizarLista={actualizarLista}
+          erroresLista={erroresLista}
+          listaForm={listaForm}
+        />
+
+        <div className="rn-field">
+          <span className="rn-label">Prioridad</span>
+          <div className="rn-prio-group">
+            {[
+              { value: "NORMAL",  label: "Normal",  mod: "normal"  },
+              { value: "ALTA",    label: "Alta",    mod: "alta"    },
+              { value: "CRITICA", label: "Crítica", mod: "urgente" },
+            ].map(({ value, label, mod }) => (
+              <div key={value} className={`rn-prio-opt rn-prio-opt--${mod}`}>
+                <input
+                  type="radio"
+                  id={`prio-${value}`}
+                  name="prioridad"
+                  value={value}
+                  checked={listaForm.prioridad === value}
+                  onChange={() => actualizarLista("prioridad", value)}
+                />
+                <label htmlFor={`prio-${value}`}>{label}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="rn-btn rn-btn--primary"
+          disabled={guardandoSolicitud || pacientesLength === 0}
+        >
+          {guardandoSolicitud ? "Registrando…" : "Agregar a lista"}
         </button>
       </div>
     </form>
   );
 }
+
+SolicitudForm.propTypes = {
+  actualizarLista:              PropTypes.func.isRequired,
+  busquedaSolicitud:            PropTypes.string.isRequired,
+  crearSolicitud:               PropTypes.func.isRequired,
+  erroresLista:                 PropTypes.object.isRequired,
+  guardandoSolicitud:           PropTypes.bool.isRequired,
+  listaForm:                    PropTypes.object.isRequired,
+  pacienteSeleccionado:         PropTypes.object,
+  pacientesLength:              PropTypes.number.isRequired,
+  pacientesParaSolicitud:       PropTypes.array.isRequired,
+  seleccionarPacienteSolicitud: PropTypes.func.isRequired,
+  setBusquedaSolicitud:         PropTypes.func.isRequired,
+};
 
 export default SolicitudForm;
