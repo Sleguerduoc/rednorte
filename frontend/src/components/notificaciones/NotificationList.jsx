@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { formatearFecha } from "../../utils/date";
+import { nombreCompleto } from "../../utils/text";
 import ListHeader from "../common/ListHeader";
 
 function NotificationList({ notificacionesFiltradas }) {
@@ -10,24 +11,22 @@ function NotificationList({ notificacionesFiltradas }) {
         {notificacionesFiltradas.length === 0 ? (
           <div className="rn-empty">No hay notificaciones que coincidan con la búsqueda.</div>
         ) : (
-          notificacionesFiltradas.slice().reverse().map((notif) => {
-            const esEmail = notif.canal === "EMAIL";
+          notificacionesFiltradas.slice().reverse().map((n) => {
+            const esEmail = n.canal === "EMAIL";
             return (
-              <div className="rn-notif-item" key={notif.id}>
+              <div className="rn-notif-item" key={n.id}>
                 <div className={`rn-notif-item__ch rn-notif-item__ch--${esEmail ? "email" : "sms"}`}>
                   {esEmail ? "✉" : "✆"}
                 </div>
                 <div className="rn-notif-item__body">
                   <div className="rn-notif-item__name">
-                    {notif.paciente?.nombre || `Paciente ${notif.pacienteId}`}
+                    {nombreCompleto(n.paciente) || `Paciente ${n.pacienteId}`}
                   </div>
-                  <div className="rn-notif-item__msg">{notif.mensaje}</div>
+                  <div className="rn-notif-item__msg">{n.mensaje}</div>
                   <div className="rn-notif-item__meta">
-                    <span>{formatearFecha(notif.fechaEnvio)}</span>
-                    <span className={`rn-badge rn-badge--${esEmail ? "email" : "sms"}`}>
-                      {notif.canal}
-                    </span>
-                    <span>{notif.estado}</span>
+                    <span>{formatearFecha(n.fechaEnvio)}</span>
+                    <span className={`rn-badge rn-badge--${esEmail ? "email" : "sms"}`}>{n.canal}</span>
+                    <span>{n.estado}</span>
                   </div>
                 </div>
               </div>
@@ -39,8 +38,6 @@ function NotificationList({ notificacionesFiltradas }) {
   );
 }
 
-NotificationList.propTypes = {
-  notificacionesFiltradas: PropTypes.array.isRequired,
-};
+NotificationList.propTypes = { notificacionesFiltradas: PropTypes.array.isRequired };
 
 export default NotificationList;

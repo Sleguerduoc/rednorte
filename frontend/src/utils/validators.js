@@ -1,43 +1,71 @@
-const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-const validarRut = (rut) => /^[0-9]{7,8}-[0-9kK]$/.test(rut.trim());
-const validarTelefono = (telefono) => /^\+?[0-9\s-]{8,15}$/.test(telefono.trim());
+const reEmail    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const reRut      = /^\d{7,8}-[\dkK]$/;
+const reTelefono = /^\+?[\d\s-]{8,15}$/;
 
-export const validarPacienteForm = (pacienteForm) => {
+const errorRut = (rut) => {
+  if (!rut)              return "Ingresa el RUT.";
+  if (!reRut.test(rut))  return "Formato requerido: 12345678-9.";
+  return null;
+};
+
+const errorFechaNacimiento = (fecha) => {
+  if (!fecha) return "Ingresa la fecha de nacimiento.";
+  const hoy  = new Date();
+  const nac  = new Date(fecha);
+  const edad = hoy.getFullYear() - nac.getFullYear();
+  if (nac > hoy)    return "La fecha no puede ser futura.";
+  if (edad > 120)   return "Fecha no válida.";
+  return null;
+};
+
+const errorEmail = (email) => {
+  if (!email)                return "Ingresa el email.";
+  if (!reEmail.test(email))  return "Email inválido.";
+  return null;
+};
+
+const errorTelefono = (tel) => {
+  if (!tel)                  return "Ingresa el teléfono.";
+  if (!reTelefono.test(tel)) return "Teléfono inválido.";
+  return null;
+};
+
+const errorTexto = (valor, campo, min = 2) => {
+  if (!valor)            return `Ingresa ${campo}.`;
+  if (valor.length < min) return `Mínimo ${min} caracteres.`;
+  return null;
+};
+
+const set = (errores, campo, mensaje) => {
+  if (mensaje) errores[campo] = mensaje;
+};
+
+export const validarPacienteForm = (f) => {
   const errores = {};
-  const rut = pacienteForm.rut.trim();
-  const nombre = pacienteForm.nombre.trim();
-  const email = pacienteForm.email.trim();
-  const telefono = pacienteForm.telefono.trim();
-  const direccion = pacienteForm.direccion.trim();
 
-  if (!rut) errores.rut = "Ingresa el RUT.";
-  else if (!validarRut(rut)) errores.rut = "Usa formato 12345678-9.";
-
-  if (!nombre) errores.nombre = "Ingresa el nombre.";
-  else if (nombre.length < 3) errores.nombre = "El nombre debe tener al menos 3 caracteres.";
-
-  if (!email) errores.email = "Ingresa el email.";
-  else if (!validarEmail(email)) errores.email = "Ingresa un email valido.";
-
-  if (!telefono) errores.telefono = "Ingresa el telefono.";
-  else if (!validarTelefono(telefono)) errores.telefono = "Ingresa un telefono valido.";
-
-  if (!direccion) errores.direccion = "Ingresa la direccion.";
-  else if (direccion.length < 5) errores.direccion = "La direccion debe ser mas descriptiva.";
+  set(errores, "rut",             errorRut(f.rut.trim()));
+  set(errores, "nombres",         errorTexto(f.nombres.trim(), "el/los nombres."));
+  set(errores, "apellidoPaterno", errorTexto(f.apellidoPaterno.trim(), "el apellido paterno."));
+  set(errores, "fechaNacimiento", errorFechaNacimiento(f.fechaNacimiento));
+  set(errores, "sexo",      f.sexo      ? null : "Selecciona el sexo.");
+  set(errores, "prevision", f.prevision ? null : "Selecciona la previsión.");
+  set(errores, "email",    errorEmail(f.email.trim()));
+  set(errores, "telefono", errorTelefono(f.telefono.trim()));
+  set(errores, "direccion", errorTexto(f.direccion.trim(), "la dirección.", 5));
 
   return errores;
 };
 
-export const validarSolicitudForm = (listaForm) => {
+export const validarSolicitudForm = (f) => {
   const errores = {};
-  const pacienteId = Number(listaForm.pacienteId);
-  const especialidad = listaForm.especialidad.trim();
+  const pacienteId = Number(f.pacienteId);
 
-  if (!listaForm.pacienteId) errores.pacienteId = "Busca y selecciona un paciente.";
-  else if (!Number.isInteger(pacienteId) || pacienteId <= 0) errores.pacienteId = "Paciente invalido.";
-
-  if (!especialidad) errores.especialidad = "Selecciona o ingresa la especialidad.";
-  else if (especialidad.length < 3) errores.especialidad = "La especialidad debe tener al menos 3 caracteres.";
+  set(errores, "pacienteId",
+    !f.pacienteId || !Number.isInteger(pacienteId) || pacienteId <= 0
+      ? "Busca y selecciona un paciente."
+      : null
+  );
+  set(errores, "especialidad", errorTexto(f.especialidad.trim(), "la especialidad.", 3));
 
   return errores;
 };

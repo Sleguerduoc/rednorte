@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { inicialesPaciente, nombreCompleto } from "../../utils/text";
 
 function PacienteFinder({
   actualizarLista,
@@ -38,7 +39,9 @@ function PacienteFinder({
                 className={`rn-finder__opt${Number(listaForm.pacienteId) === Number(paciente.id) ? " rn-finder__opt--sel" : ""}`}
                 onClick={() => seleccionarPacienteSolicitud(paciente)}
               >
-                <span className="rn-finder__opt-name">{paciente.nombre}</span>
+                <span className="rn-finder__opt-name">
+                  {inicialesPaciente(paciente)}&nbsp;&nbsp;{nombreCompleto(paciente)}
+                </span>
                 <span className="rn-finder__opt-rut">{paciente.rut} · {paciente.email}</span>
               </button>
             ))
