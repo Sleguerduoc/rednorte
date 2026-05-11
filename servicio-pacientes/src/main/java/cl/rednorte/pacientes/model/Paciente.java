@@ -22,12 +22,20 @@ public class Paciente {
     private String rut;
 
     @NotBlank
-    private String nombre;
+    private String nombres;
+
+    @NotBlank
+    private String apellidoPaterno;
+
+    private String apellidoMaterno;
 
     @Email
     private String email;
 
     private String telefono;
     private String direccion;
+    private String fechaNacimiento;
+    private String sexo;
+    private String prevision;
     private String estado;
 }

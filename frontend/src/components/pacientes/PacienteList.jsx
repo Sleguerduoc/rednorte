@@ -1,14 +1,6 @@
 import PropTypes from "prop-types";
+import { inicialesPaciente, nombreCompleto } from "../../utils/text";
 import ListHeader from "../common/ListHeader";
-
-function initials(nombre) {
-  return String(nombre || "?")
-    .split(" ")
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
-}
 
 function PacienteList({ pacientesFiltrados, prepararSolicitudDesdePaciente }) {
   return (
@@ -20,9 +12,9 @@ function PacienteList({ pacientesFiltrados, prepararSolicitudDesdePaciente }) {
         ) : (
           pacientesFiltrados.map((paciente) => (
             <div className="rn-pat-item" key={paciente.id}>
-              <div className="rn-pat-item__av">{initials(paciente.nombre)}</div>
+              <div className="rn-pat-item__av">{inicialesPaciente(paciente)}</div>
               <div className="rn-pat-item__info">
-                <div className="rn-pat-item__name">{paciente.nombre}</div>
+                <div className="rn-pat-item__name">{nombreCompleto(paciente)}</div>
                 <div className="rn-pat-item__meta">
                   <span>{paciente.rut}</span>
                   <span>{paciente.email}</span>
@@ -47,7 +39,7 @@ function PacienteList({ pacientesFiltrados, prepararSolicitudDesdePaciente }) {
 }
 
 PacienteList.propTypes = {
-  pacientesFiltrados:           PropTypes.array.isRequired,
+  pacientesFiltrados:             PropTypes.array.isRequired,
   prepararSolicitudDesdePaciente: PropTypes.func.isRequired,
 };
 

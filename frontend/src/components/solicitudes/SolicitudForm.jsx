@@ -1,15 +1,7 @@
 import PropTypes from "prop-types";
+import { inicialesPaciente, nombreCompleto } from "../../utils/text";
 import EspecialidadPicker from "./EspecialidadPicker";
 import PacienteFinder from "./PacienteFinder";
-
-function initials(nombre) {
-  return String(nombre || "?")
-    .split(" ")
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
-}
 
 function SolicitudForm({
   actualizarLista,
@@ -40,9 +32,9 @@ function SolicitudForm({
 
         {pacienteSeleccionado && (
           <div className="rn-sel-patient">
-            <div className="rn-sel-patient__av">{initials(pacienteSeleccionado.nombre)}</div>
+            <div className="rn-sel-patient__av">{inicialesPaciente(pacienteSeleccionado)}</div>
             <div className="rn-sel-patient__info">
-              <div className="rn-sel-patient__name">{pacienteSeleccionado.nombre}</div>
+              <div className="rn-sel-patient__name">{nombreCompleto(pacienteSeleccionado)}</div>
               <div className="rn-sel-patient__rut">{pacienteSeleccionado.rut}</div>
             </div>
           </div>
