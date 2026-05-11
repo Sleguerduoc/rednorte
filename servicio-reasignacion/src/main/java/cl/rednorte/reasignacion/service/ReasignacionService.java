@@ -21,6 +21,7 @@ public class ReasignacionService {
     public void procesarCancelacion(CitaCanceladaEvent evento) {
         Reasignacion reasignacion = Reasignacion.builder()
                 .citaId(evento.getCitaId())
+                .pacienteId(evento.getPacienteId())
                 .especialidad(evento.getEspecialidad())
                 .fecha(evento.getFecha())
                 .estado("REASIGNACION_GENERADA")
@@ -29,19 +30,22 @@ public class ReasignacionService {
 
         repository.save(reasignacion);
 
-        String mensaje = "Se ha liberado una cita para "
-        + evento.getEspecialidad()
-        + " en la fecha "
-        + evento.getFecha();
+        String mensaje = String.format(
+                "Paciente %d: se cancelo la cita #%d de %s para el %s. Se inicio la reasignacion automatica.",
+                evento.getPacienteId(),
+                evento.getCitaId(),
+                evento.getEspecialidad(),
+                evento.getFecha()
+        );
 
         NotificacionSolicitadaEvent notificacionEmail = NotificacionSolicitadaEvent.builder()
-                .pacienteId(1L)
+                .pacienteId(evento.getPacienteId())
                 .canal("EMAIL")
                 .mensaje(mensaje)
                 .build();
 
         NotificacionSolicitadaEvent notificacionSms = NotificacionSolicitadaEvent.builder()
-                .pacienteId(1L)
+                .pacienteId(evento.getPacienteId())
                 .canal("SMS")
                 .mensaje(mensaje)
                 .build();

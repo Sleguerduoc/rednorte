@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class CitaCanceladaEvent {
     private Long citaId;
+    private Long pacienteId;
     private String especialidad;
     private String fecha;
 }

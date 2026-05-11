@@ -19,6 +19,7 @@ public class Reasignacion {
     private Long id;
 
     private Long citaId;
+    private Long pacienteId;
     private String especialidad;
     private String fecha;
     private String estado;
