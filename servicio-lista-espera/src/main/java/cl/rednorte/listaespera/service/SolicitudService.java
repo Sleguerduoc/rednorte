@@ -33,9 +33,15 @@ public class SolicitudService {
         return repository.findAll();
     }
 
-    public void cancelarCita(Long citaId, String especialidad, String fecha) {
+    public void cancelarCita(Long citaId, Long pacienteId, String especialidad, String fecha) {
+        repository.findById(citaId).ifPresent(solicitud -> {
+            solicitud.setEstado("CANCELADA");
+            repository.save(solicitud);
+        });
+
         CitaCanceladaEvent evento = CitaCanceladaEvent.builder()
                 .citaId(citaId)
+                .pacienteId(pacienteId)
                 .especialidad(especialidad)
                 .fecha(fecha)
                 .build();
