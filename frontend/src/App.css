@@ -455,12 +455,26 @@ button, input, select, textarea { font: inherit; }
 /* ══════════════════════════════════════════
    FORMS
    ══════════════════════════════════════════ */
+.rn-form-section-title {
+  font-size: .6875rem;
+  font-weight: 700;
+  color: var(--ghost);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.rn-form-section-title:first-child { margin-top: 0; }
+
 .rn-form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
   gap: 12px 16px;
   align-items: end;
 }
+.rn-form--3 { grid-template-columns: repeat(3, 1fr); }
+.rn-form--4 { grid-template-columns: repeat(4, 1fr); }
 
 .rn-field        { display: flex; flex-direction: column; gap: 5px; }
 .rn-field--full  { grid-column: 1 / -1; }

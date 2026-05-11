@@ -1,15 +1,20 @@
 export const estadoInicialPaciente = {
-  rut: "",
-  nombre: "",
-  email: "",
-  telefono: "",
-  direccion: ""
+  rut:             "",
+  nombres:         "",
+  apellidoPaterno: "",
+  apellidoMaterno: "",
+  fechaNacimiento: "",
+  sexo:            "",
+  prevision:       "",
+  email:           "",
+  telefono:        "",
+  direccion:       "",
 };
 
 export const estadoInicialLista = {
-  pacienteId: "",
+  pacienteId:  "",
   especialidad: "",
-  prioridad: "NORMAL"
+  prioridad:   "NORMAL",
 };
 
 export const ESPECIALIDADES = [
@@ -20,5 +25,17 @@ export const ESPECIALIDADES = [
   "Neurologia",
   "Oftalmologia",
   "Pediatria",
-  "Traumatologia"
+  "Traumatologia",
+];
+
+export const SEXOS = [
+  { value: "MASCULINO", label: "Masculino" },
+  { value: "FEMENINO",  label: "Femenino"  },
+  { value: "OTRO",      label: "Otro"       },
+];
+
+export const PREVISIONES = [
+  { value: "FONASA",  label: "FONASA"  },
+  { value: "ISAPRE",  label: "ISAPRE"  },
+  { value: "NINGUNA", label: "Sin previsión" },
 ];
