@@ -28,9 +28,10 @@ public class SolicitudController {
     @PostMapping("/cancelar-cita")
     public String cancelarCita(
         @RequestParam Long citaId,
+        @RequestParam Long pacienteId,
         @RequestParam String especialidad,
         @RequestParam String fecha) {
-        service.cancelarCita(citaId, especialidad, fecha);
-        return "Evento CitaCancelada publicado correctamente";
+        service.cancelarCita(citaId, pacienteId, especialidad, fecha);
+        return "Cita cancelada correctamente";
     }
 }
