@@ -1,7 +1,6 @@
 package cl.rednorte.pacientes.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -22,12 +21,19 @@ public class Paciente {
     private String rut;
 
     @NotBlank
-    private String nombre;
+    private String nombres;
 
-    @Email
+    @NotBlank
+    private String apellidoPaterno;
+
+    private String apellidoMaterno;
+
     private String email;
 
     private String telefono;
     private String direccion;
+    private String fechaNacimiento;
+    private String sexo;
+    private String prevision;
     private String estado;
 }

@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { inicialesPaciente, nombreCompleto } from "../../utils/text";
 
 function PacienteFinder({
   actualizarLista,
@@ -9,6 +10,9 @@ function PacienteFinder({
   seleccionarPacienteSolicitud,
   setBusquedaSolicitud,
 }) {
+  /* Ocultar el dropdown si ya hay un paciente seleccionado */
+  const mostrarDropdown = busquedaSolicitud.trim().length > 0 && !listaForm.pacienteId;
+
   return (
     <div className="rn-field rn-finder">
       <label className="rn-label" htmlFor="finder-input">Buscar paciente</label>
@@ -26,7 +30,7 @@ function PacienteFinder({
         <span className="rn-field-error">{erroresLista.pacienteId}</span>
       )}
 
-      {busquedaSolicitud.trim().length > 0 && (
+      {mostrarDropdown && (
         <div className="rn-finder__results">
           {pacientesParaSolicitud.length === 0 ? (
             <div className="rn-finder__empty">Sin resultados</div>
@@ -38,7 +42,9 @@ function PacienteFinder({
                 className={`rn-finder__opt${Number(listaForm.pacienteId) === Number(paciente.id) ? " rn-finder__opt--sel" : ""}`}
                 onClick={() => seleccionarPacienteSolicitud(paciente)}
               >
-                <span className="rn-finder__opt-name">{paciente.nombre}</span>
+                <span className="rn-finder__opt-name">
+                  {inicialesPaciente(paciente)}&nbsp;&nbsp;{nombreCompleto(paciente)}
+                </span>
                 <span className="rn-finder__opt-rut">{paciente.rut} · {paciente.email}</span>
               </button>
             ))

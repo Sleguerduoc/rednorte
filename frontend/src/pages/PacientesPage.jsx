@@ -6,6 +6,7 @@ function PacientesPage({
   actualizarPaciente,
   busquedaPacientes,
   crearPaciente,
+  eliminarPaciente,
   erroresPaciente,
   guardandoPaciente,
   pacienteForm,
@@ -44,6 +45,7 @@ function PacientesPage({
       </div>
 
       <PacienteList
+        eliminarPaciente={eliminarPaciente}
         pacientesFiltrados={pacientesFiltrados}
         prepararSolicitudDesdePaciente={prepararSolicitudDesdePaciente}
       />
@@ -52,15 +54,16 @@ function PacientesPage({
 }
 
 PacientesPage.propTypes = {
-  actualizarPaciente:           PropTypes.func.isRequired,
-  busquedaPacientes:            PropTypes.string.isRequired,
-  crearPaciente:                PropTypes.func.isRequired,
-  erroresPaciente:              PropTypes.object.isRequired,
-  guardandoPaciente:            PropTypes.bool.isRequired,
-  pacienteForm:                 PropTypes.object.isRequired,
-  pacientesFiltrados:           PropTypes.array.isRequired,
+  actualizarPaciente:             PropTypes.func.isRequired,
+  busquedaPacientes:              PropTypes.string.isRequired,
+  crearPaciente:                  PropTypes.func.isRequired,
+  eliminarPaciente:               PropTypes.func.isRequired,
+  erroresPaciente:                PropTypes.object.isRequired,
+  guardandoPaciente:              PropTypes.bool.isRequired,
+  pacienteForm:                   PropTypes.object.isRequired,
+  pacientesFiltrados:             PropTypes.array.isRequired,
   prepararSolicitudDesdePaciente: PropTypes.func.isRequired,
-  setBusquedaPacientes:         PropTypes.func.isRequired,
+  setBusquedaPacientes:           PropTypes.func.isRequired,
 };
 
 export default PacientesPage;

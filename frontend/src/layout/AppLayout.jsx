@@ -1,25 +1,37 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import StatusMessage from "../components/feedback/StatusMessage";
 import rednorteLogo from "../assets/rednorte-logo.png";
 
-const NAV_ITEMS = [
-  { to: "/dashboard",      label: "Dashboard",      icon: "◈" },
-  { to: "/pacientes",      label: "Pacientes",       icon: "◉" },
-  { to: "/listas-espera",  label: "Lista de espera", icon: "◎" },
-  { to: "/citas",          label: "Citas",            icon: "◇" },
-  { to: "/notificaciones", label: "Notificaciones",  icon: "◬" },
-];
+const NAV_POR_ROL = {
+  ADMIN: [
+    { to: "/dashboard",      label: "Dashboard",      icon: "◈" },
+    { to: "/pacientes",      label: "Pacientes",       icon: "◉" },
+    { to: "/listas-espera",  label: "Lista de espera", icon: "◎" },
+    { to: "/citas",          label: "Citas",            icon: "◇" },
+    { to: "/notificaciones", label: "Notificaciones",  icon: "◬" },
+  ],
+  DOCTOR: [
+    { to: "/doctor",       label: "Pacientes",       icon: "◉" },
+    { to: "/listas-espera", label: "Agendar / Cupo",  icon: "◎" },
+  ],
+  CLIENTE: [
+    { to: "/mis-citas",    label: "Mis citas",    icon: "◇" },
+    { to: "/listas-espera", label: "Agendar hora", icon: "＋" },
+  ],
+};
 
 function AppLayout({ cargandoDatos, children, mensaje, onActualizar }) {
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const navItems = NAV_POR_ROL[user?.rol] ?? [];
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <div className="rn-shell">
-      {/* Overlay móvil */}
       <div
         className={`rn-overlay${sidebarOpen ? "" : " rn-overlay--hidden"}`}
         onClick={closeSidebar}
@@ -27,6 +39,7 @@ function AppLayout({ cargandoDatos, children, mensaje, onActualizar }) {
       />
 
       <aside className={`rn-sidebar${sidebarOpen ? " rn-sidebar--open" : ""}`}>
+        {/* Brand */}
         <div className="rn-brand">
           <div className="rn-brand__logo">
             <img src={rednorteLogo} alt="Logo RedNorte" />
@@ -39,8 +52,9 @@ function AppLayout({ cargandoDatos, children, mensaje, onActualizar }) {
 
         <div className="rn-sidebar__div" />
 
+        {/* Nav */}
         <nav className="rn-nav">
-          {NAV_ITEMS.map(({ to, label, icon }) => (
+          {navItems.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -54,6 +68,19 @@ function AppLayout({ cargandoDatos, children, mensaje, onActualizar }) {
             </NavLink>
           ))}
         </nav>
+
+        {/* User card + logout */}
+        <div className="rn-sidebar__user">
+          <div className="rn-user-card">
+            <span className="rn-user-card__name">{user?.nombre}</span>
+            <span className={`rn-role-badge rn-role-badge--${user?.rol}`}>
+              {user?.rol}
+            </span>
+          </div>
+          <button type="button" className="rn-logout-btn" onClick={logout}>
+            ← Cerrar sesión
+          </button>
+        </div>
 
         <div className="rn-sidebar__footer">
           <span>Sistema Operativo</span>

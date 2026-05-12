@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import AppLayout from "./layout/AppLayout";
+import LoginPage from "./pages/LoginPage";
 import AppRoutes from "./routes/AppRoutes";
 import { useRedNorteData } from "./hooks/useRedNorteData";
 import "./App.css";
 
-function App() {
+function AppAutenticada() {
   const navigate = useNavigate();
   const { acciones, busquedas, colecciones, estado } = useRedNorteData();
 
@@ -28,6 +30,13 @@ function App() {
       />
     </AppLayout>
   );
+}
+
+function App() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user)   return <LoginPage />;
+  return <AppAutenticada />;
 }
 
 export default App;
