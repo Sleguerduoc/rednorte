@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(Sort-Object)",
+      "Bash(mvnw.cmd compile *)",
+      "Bash(./mvnw compile *)"
     ]
   }
 }

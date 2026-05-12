@@ -1,32 +1,68 @@
 import axios from "axios";
 import { API_URL } from "../config/api";
 
+const STORAGE_KEY = "rednorte_user";
+
+function authHeaders() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const { token } = JSON.parse(stored);
+      return { Authorization: `Bearer ${token}` };
+    }
+  } catch {
+    // ignore
+  }
+  return {};
+}
+
 export const rednorteApi = {
+  login(username, password) {
+    return axios.post(`${API_URL}/auth/login`, { username, password });
+  },
+
+  /**
+   * Carga inicial: usa los endpoints BFF para dashboard y lista de espera.
+   * El resto (pacientes, reasignaciones, notificaciones) se llama directamente
+   * porque tienen vistas propias que necesitan el detalle completo.
+   */
   async cargarDatos() {
-    const [pacientes, listas, reasignaciones, notificaciones] = await Promise.all([
-      axios.get(`${API_URL}/pacientes`),
-      axios.get(`${API_URL}/listas-espera`),
-      axios.get(`${API_URL}/reasignaciones`),
-      axios.get(`${API_URL}/notificaciones`)
+    const headers = authHeaders();
+
+    const [bffDashboard, pacientes, bffLista, reasignaciones, notificaciones] = await Promise.all([
+      axios.get(`${API_URL}/bff/dashboard`,               { headers }),  // BFF: totales agregados
+      axios.get(`${API_URL}/pacientes`,                   { headers }),  // directo: lista completa
+      axios.get(`${API_URL}/bff/lista-espera/completa`,   { headers }),  // BFF: solicitudes + paciente
+      axios.get(`${API_URL}/reasignaciones`,              { headers }),  // directo: timeline
+      axios.get(`${API_URL}/notificaciones`,              { headers }),  // directo: detalle notif
     ]);
 
     return {
-      pacientes: pacientes.data,
-      listas: listas.data,
+      dashboardStats: bffDashboard.data,
+      pacientes:      pacientes.data,
+      listas:         bffLista.data,       // ya enriquecidas con pacienteNombre/pacienteRut
       reasignaciones: reasignaciones.data,
-      notificaciones: notificaciones.data
+      notificaciones: notificaciones.data,
     };
   },
 
   crearPaciente(paciente) {
-    return axios.post(`${API_URL}/pacientes`, paciente);
+    return axios.post(`${API_URL}/pacientes`, paciente, { headers: authHeaders() });
   },
 
   crearSolicitud(solicitud) {
-    return axios.post(`${API_URL}/listas-espera`, solicitud);
+    return axios.post(`${API_URL}/listas-espera`, solicitud, { headers: authHeaders() });
   },
 
   cancelarCita(params) {
-    return axios.post(`${API_URL}/listas-espera/cancelar-cita?${new URLSearchParams(params).toString()}`);
-  }
+    return axios.post(
+      `${API_URL}/listas-espera/cancelar-cita?${new URLSearchParams(params).toString()}`,
+      null,
+      { headers: authHeaders() }
+    );
+  },
+
+  eliminarPaciente(id) {
+    return axios.delete(`${API_URL}/pacientes/${id}`, { headers: authHeaders() });
+  },
 };

@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { formatearFecha } from "../../utils/date";
-import { normalizar } from "../../utils/text";
+import { nombreCompleto, normalizar } from "../../utils/text";
 import ListHeader from "../common/ListHeader";
 
 function TablaSolicitudes({ solicitudes }) {
@@ -20,28 +20,20 @@ function TablaSolicitudes({ solicitudes }) {
           </thead>
           <tbody>
             {solicitudes.length === 0 ? (
-              <tr className="rn-empty-row">
-                <td colSpan="5">No hay solicitudes activas.</td>
-              </tr>
+              <tr className="rn-empty-row"><td colSpan="5">No hay solicitudes activas.</td></tr>
             ) : (
-              solicitudes.map((solicitud) => (
-                <tr key={solicitud.id}>
+              solicitudes.map((s) => (
+                <tr key={s.id}>
                   <td>
-                    <div className="rn-td-name">
-                      {solicitud.paciente?.nombre || `Paciente ${solicitud.pacienteId}`}
-                    </div>
-                    <div className="rn-td-sub">{solicitud.paciente?.rut || "Sin RUT"}</div>
+                    <div className="rn-td-name">{s.pacienteNombre || nombreCompleto(s.paciente) || `Paciente ${s.pacienteId}`}</div>
+                    <div className="rn-td-sub">{s.pacienteRut || s.paciente?.rut || "Sin RUT"}</div>
                   </td>
-                  <td>{solicitud.especialidad}</td>
+                  <td>{s.especialidad}</td>
                   <td>
-                    <span className={`rn-badge rn-badge--${normalizar(solicitud.prioridad)}`}>
-                      {solicitud.prioridad}
-                    </span>
+                    <span className={`rn-badge rn-badge--${normalizar(s.prioridad)}`}>{s.prioridad}</span>
                   </td>
-                  <td className="rn-td-id">{formatearFecha(solicitud.fechaRegistro)}</td>
-                  <td>
-                    <span className="rn-badge rn-badge--activo">{solicitud.estado}</span>
-                  </td>
+                  <td className="rn-td-id">{formatearFecha(s.fechaRegistro)}</td>
+                  <td><span className="rn-badge rn-badge--activo">{s.estado}</span></td>
                 </tr>
               ))
             )}
@@ -52,8 +44,6 @@ function TablaSolicitudes({ solicitudes }) {
   );
 }
 
-TablaSolicitudes.propTypes = {
-  solicitudes: PropTypes.array.isRequired,
-};
+TablaSolicitudes.propTypes = { solicitudes: PropTypes.array.isRequired };
 
 export default TablaSolicitudes;
