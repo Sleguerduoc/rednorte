@@ -21,17 +21,26 @@ export const rednorteApi = {
     return axios.post(`${API_URL}/auth/login`, { username, password });
   },
 
+  /**
+   * Carga inicial: usa los endpoints BFF para dashboard y lista de espera.
+   * El resto (pacientes, reasignaciones, notificaciones) se llama directamente
+   * porque tienen vistas propias que necesitan el detalle completo.
+   */
   async cargarDatos() {
     const headers = authHeaders();
-    const [pacientes, listas, reasignaciones, notificaciones] = await Promise.all([
-      axios.get(`${API_URL}/pacientes`,       { headers }),
-      axios.get(`${API_URL}/listas-espera`,   { headers }),
-      axios.get(`${API_URL}/reasignaciones`,  { headers }),
-      axios.get(`${API_URL}/notificaciones`,  { headers }),
+
+    const [bffDashboard, pacientes, bffLista, reasignaciones, notificaciones] = await Promise.all([
+      axios.get(`${API_URL}/bff/dashboard`,               { headers }),  // BFF: totales agregados
+      axios.get(`${API_URL}/pacientes`,                   { headers }),  // directo: lista completa
+      axios.get(`${API_URL}/bff/lista-espera/completa`,   { headers }),  // BFF: solicitudes + paciente
+      axios.get(`${API_URL}/reasignaciones`,              { headers }),  // directo: timeline
+      axios.get(`${API_URL}/notificaciones`,              { headers }),  // directo: detalle notif
     ]);
+
     return {
-      pacientes:     pacientes.data,
-      listas:        listas.data,
+      dashboardStats: bffDashboard.data,
+      pacientes:      pacientes.data,
+      listas:         bffLista.data,       // ya enriquecidas con pacienteNombre/pacienteRut
       reasignaciones: reasignaciones.data,
       notificaciones: notificaciones.data,
     };

@@ -2,15 +2,10 @@ import PropTypes from "prop-types";
 import StatCards from "../components/dashboard/StatCards";
 import TimelineReasignaciones from "../components/reasignaciones/TimelineReasignaciones";
 
-function DashboardPage({ notificaciones, pacientes, pacientesPorId, reasignaciones, solicitudesActivas }) {
+function DashboardPage({ dashboardStats, pacientesPorId, reasignaciones }) {
   return (
     <>
-      <StatCards
-        notificaciones={notificaciones}
-        pacientes={pacientes}
-        reasignaciones={reasignaciones}
-        solicitudesActivas={solicitudesActivas}
-      />
+      <StatCards dashboardStats={dashboardStats} />
 
       <div className="rn-panel">
         <div className="rn-panel__head">
@@ -26,11 +21,14 @@ function DashboardPage({ notificaciones, pacientes, pacientesPorId, reasignacion
 }
 
 DashboardPage.propTypes = {
-  notificaciones:    PropTypes.array.isRequired,
-  pacientes:         PropTypes.array.isRequired,
-  pacientesPorId:    PropTypes.instanceOf(Map).isRequired,
-  reasignaciones:    PropTypes.array.isRequired,
-  solicitudesActivas: PropTypes.array.isRequired,
+  dashboardStats: PropTypes.shape({
+    totalPacientes:        PropTypes.number.isRequired,
+    solicitudesPendientes: PropTypes.number.isRequired,
+    totalReasignaciones:   PropTypes.number.isRequired,
+    totalNotificaciones:   PropTypes.number.isRequired,
+  }).isRequired,
+  pacientesPorId: PropTypes.instanceOf(Map).isRequired,
+  reasignaciones: PropTypes.array.isRequired,
 };
 
 export default DashboardPage;

@@ -43,11 +43,9 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
         <>
           <Route path="/dashboard" element={
             <DashboardPage
-              notificaciones={colecciones.notificaciones}
-              pacientes={colecciones.pacientes}
+              dashboardStats={colecciones.dashboardStats}
               pacientesPorId={colecciones.pacientesPorId}
               reasignaciones={colecciones.reasignaciones}
-              solicitudesActivas={colecciones.solicitudesActivas}
             />
           } />
           <Route path="/pacientes" element={

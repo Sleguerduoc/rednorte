@@ -12,6 +12,11 @@ const textosBusquedaPaciente = (p) =>
   normalizar(`${p.rut} ${nombreCompleto(p)} ${p.email} ${p.telefono}`);
 
 export function useRedNorteData() {
+  const [dashboardStats, setDashboardStats] = useState({
+    totalPacientes: 0, totalSolicitudes: 0,
+    solicitudesPendientes: 0, solicitudesCanceladas: 0,
+    totalReasignaciones: 0, totalNotificaciones: 0,
+  });
   const [pacientes,      setPacientes]      = useState([]);
   const [listas,         setListas]         = useState([]);
   const [reasignaciones, setReasignaciones] = useState([]);
@@ -87,6 +92,7 @@ export function useRedNorteData() {
     setCargandoDatos(true);
     try {
       const datos = await rednorteApi.cargarDatos();
+      setDashboardStats(datos.dashboardStats);
       setPacientes(datos.pacientes);
       setListas(datos.listas);
       setReasignaciones(datos.reasignaciones);
@@ -250,6 +256,7 @@ export function useRedNorteData() {
       setBusquedaSolicitud,
     },
     colecciones: {
+      dashboardStats,
       citasFiltradas,
       notificaciones,
       notificacionesFiltradas,
