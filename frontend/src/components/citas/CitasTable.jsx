@@ -27,8 +27,8 @@ function CitasTable({ cancelarCita, cancelandoCitaId, citasFiltradas }) {
                 <tr key={s.id}>
                   <td className="rn-td-id">#{s.id}</td>
                   <td>
-                    <div className="rn-td-name">{nombreCompleto(s.paciente) || `Paciente ${s.pacienteId}`}</div>
-                    <div className="rn-td-sub">{s.paciente?.rut || "Sin RUT"}</div>
+                    <div className="rn-td-name">{s.pacienteNombre || nombreCompleto(s.paciente) || `Paciente ${s.pacienteId}`}</div>
+                    <div className="rn-td-sub">{s.pacienteRut || s.paciente?.rut || "Sin RUT"}</div>
                   </td>
                   <td>{s.especialidad}</td>
                   <td className="rn-td-id">{formatearFecha(fechaDesdeSolicitud(s))}</td>

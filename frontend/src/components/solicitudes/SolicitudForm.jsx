@@ -3,6 +3,13 @@ import { inicialesPaciente, nombreCompleto } from "../../utils/text";
 import EspecialidadPicker from "./EspecialidadPicker";
 import PacienteFinder from "./PacienteFinder";
 
+const PRIORIDADES = [
+  { value: "NORMAL",     label: "Normal",     mod: "normal"     },
+  { value: "ALTA",       label: "Alta",       mod: "alta"       },
+  { value: "CRITICA",    label: "Crítica",    mod: "urgente"    },
+  { value: "SOBRE_CUPO", label: "Sobre cupo", mod: "sobre_cupo" },
+];
+
 function SolicitudForm({
   actualizarLista,
   busquedaSolicitud,
@@ -10,6 +17,7 @@ function SolicitudForm({
   erroresLista,
   guardandoSolicitud,
   listaForm,
+  modoCliente,
   pacienteSeleccionado,
   pacientesLength,
   pacientesParaSolicitud,
@@ -18,26 +26,45 @@ function SolicitudForm({
 }) {
   return (
     <form onSubmit={crearSolicitud} className="rn-split-form" noValidate>
-      {/* Columna izquierda: buscador */}
-      <div className="rn-split-form__left">
-        <PacienteFinder
-          actualizarLista={actualizarLista}
-          busquedaSolicitud={busquedaSolicitud}
-          erroresLista={erroresLista}
-          listaForm={listaForm}
-          pacientesParaSolicitud={pacientesParaSolicitud}
-          seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
-          setBusquedaSolicitud={setBusquedaSolicitud}
-        />
 
-        {pacienteSeleccionado && (
-          <div className="rn-sel-patient">
+      {/* Columna izquierda: buscador (oculto en modo cliente) */}
+      <div className="rn-split-form__left">
+        {modoCliente && pacienteSeleccionado && (
+          <div className="rn-sel-patient rn-sel-patient--readonly">
             <div className="rn-sel-patient__av">{inicialesPaciente(pacienteSeleccionado)}</div>
             <div className="rn-sel-patient__info">
               <div className="rn-sel-patient__name">{nombreCompleto(pacienteSeleccionado)}</div>
               <div className="rn-sel-patient__rut">{pacienteSeleccionado.rut}</div>
             </div>
           </div>
+        )}
+        {modoCliente && !pacienteSeleccionado && (
+          <p className="rn-field-error" style={{ marginTop: 0 }}>
+            Cargando datos del paciente…
+          </p>
+        )}
+        {!modoCliente && (
+          /* Vista admin / doctor: buscador completo */
+          <>
+            <PacienteFinder
+              actualizarLista={actualizarLista}
+              busquedaSolicitud={busquedaSolicitud}
+              erroresLista={erroresLista}
+              listaForm={listaForm}
+              pacientesParaSolicitud={pacientesParaSolicitud}
+              seleccionarPacienteSolicitud={seleccionarPacienteSolicitud}
+              setBusquedaSolicitud={setBusquedaSolicitud}
+            />
+            {pacienteSeleccionado && (
+              <div className="rn-sel-patient">
+                <div className="rn-sel-patient__av">{inicialesPaciente(pacienteSeleccionado)}</div>
+                <div className="rn-sel-patient__info">
+                  <div className="rn-sel-patient__name">{nombreCompleto(pacienteSeleccionado)}</div>
+                  <div className="rn-sel-patient__rut">{pacienteSeleccionado.rut}</div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -52,11 +79,7 @@ function SolicitudForm({
         <div className="rn-field">
           <span className="rn-label">Prioridad</span>
           <div className="rn-prio-group">
-            {[
-              { value: "NORMAL",  label: "Normal",  mod: "normal"  },
-              { value: "ALTA",    label: "Alta",    mod: "alta"    },
-              { value: "CRITICA", label: "Crítica", mod: "urgente" },
-            ].map(({ value, label, mod }) => (
+            {PRIORIDADES.map(({ value, label, mod }) => (
               <div key={value} className={`rn-prio-opt rn-prio-opt--${mod}`}>
                 <input
                   type="radio"
@@ -91,6 +114,7 @@ SolicitudForm.propTypes = {
   erroresLista:                 PropTypes.object.isRequired,
   guardandoSolicitud:           PropTypes.bool.isRequired,
   listaForm:                    PropTypes.object.isRequired,
+  modoCliente:                  PropTypes.bool,
   pacienteSeleccionado:         PropTypes.object,
   pacientesLength:              PropTypes.number.isRequired,
   pacientesParaSolicitud:       PropTypes.array.isRequired,

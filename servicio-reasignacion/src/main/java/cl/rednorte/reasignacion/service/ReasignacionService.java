@@ -19,38 +19,45 @@ public class ReasignacionService {
     private final RabbitTemplate rabbitTemplate;
 
     public void procesarCancelacion(CitaCanceladaEvent evento) {
-        Reasignacion reasignacion = Reasignacion.builder()
+
+        Reasignacion registro = Reasignacion.builder()
                 .citaId(evento.getCitaId())
                 .pacienteId(evento.getPacienteId())
                 .especialidad(evento.getEspecialidad())
                 .fecha(evento.getFecha())
-                .estado("REASIGNACION_GENERADA")
+                .estado("AVISO_ENVIADO")
                 .fechaProcesamiento(LocalDateTime.now())
                 .build();
 
-        repository.save(reasignacion);
+        repository.save(registro);
 
-        String mensaje = String.format(
-                "Paciente %d: se cancelo la cita #%d de %s para el %s. Se inicio la reasignacion automatica.",
-                evento.getPacienteId(),
+        String mensajeEmail = String.format(
+                "Estimado/a paciente, su cita N°%d de %s programada para el %s ha sido cancelada. " +
+                "Para reagendar, comuníquese con su centro de salud RedNorte.",
                 evento.getCitaId(),
                 evento.getEspecialidad(),
                 evento.getFecha()
         );
 
-        NotificacionSolicitadaEvent notificacionEmail = NotificacionSolicitadaEvent.builder()
-                .pacienteId(evento.getPacienteId())
-                .canal("EMAIL")
-                .mensaje(mensaje)
-                .build();
+        String mensajeSms = String.format(
+                "RedNorte: Cita N°%d de %s del %s cancelada. Contáctenos para reagendar.",
+                evento.getCitaId(),
+                evento.getEspecialidad(),
+                evento.getFecha()
+        );
 
-        NotificacionSolicitadaEvent notificacionSms = NotificacionSolicitadaEvent.builder()
-                .pacienteId(evento.getPacienteId())
-                .canal("SMS")
-                .mensaje(mensaje)
-                .build();
+        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA,
+                NotificacionSolicitadaEvent.builder()
+                        .pacienteId(evento.getPacienteId())
+                        .canal("EMAIL")
+                        .mensaje(mensajeEmail)
+                        .build());
 
-        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA, notificacionEmail);
-        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA, notificacionSms);
+        rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA,
+                NotificacionSolicitadaEvent.builder()
+                        .pacienteId(evento.getPacienteId())
+                        .canal("SMS")
+                        .mensaje(mensajeSms)
+                        .build());
     }
 }

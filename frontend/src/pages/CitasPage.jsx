@@ -41,8 +41,8 @@ function CitasPage({
       <div className="rn-panel">
         <div className="rn-panel__head">
           <div>
-            <h2 className="rn-panel__title">Reasignaciones recientes</h2>
-            <p className="rn-panel__sub">Activadas automáticamente al cancelar una cita.</p>
+            <h2 className="rn-panel__title">Avisos de reagendamiento</h2>
+            <p className="rn-panel__sub">Al cancelar una cita, el paciente recibe EMAIL y SMS para reagendar. El cupo queda disponible para asignación manual.</p>
           </div>
         </div>
         <TimelineReasignaciones reasignaciones={reasignaciones} pacientesPorId={pacientesPorId} />
