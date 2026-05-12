@@ -151,6 +151,17 @@ export function useRedNorteData() {
     }
   };
 
+  const eliminarPaciente = async (id) => {
+    try {
+      await rednorteApi.eliminarPaciente(id);
+      setPacientes((prev) => prev.filter((p) => p.id !== id));
+      mostrarMensaje("exito", "Paciente eliminado correctamente.");
+    } catch (error) {
+      console.error("Error eliminando paciente:", error);
+      mostrarMensaje("error", obtenerMensajeError(error, "No se pudo eliminar el paciente."));
+    }
+  };
+
   const crearSolicitud = async (e) => {
     e.preventDefault();
     const errores = validarSolicitudForm(listaForm);
@@ -225,6 +236,7 @@ export function useRedNorteData() {
       cargarDatos,
       crearPaciente,
       crearSolicitud,
+      eliminarPaciente,
       seleccionarPacienteSolicitud,
     },
     busquedas: {

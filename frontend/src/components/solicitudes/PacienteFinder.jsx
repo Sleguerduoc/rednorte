@@ -10,6 +10,9 @@ function PacienteFinder({
   seleccionarPacienteSolicitud,
   setBusquedaSolicitud,
 }) {
+  /* Ocultar el dropdown si ya hay un paciente seleccionado */
+  const mostrarDropdown = busquedaSolicitud.trim().length > 0 && !listaForm.pacienteId;
+
   return (
     <div className="rn-field rn-finder">
       <label className="rn-label" htmlFor="finder-input">Buscar paciente</label>
@@ -27,7 +30,7 @@ function PacienteFinder({
         <span className="rn-field-error">{erroresLista.pacienteId}</span>
       )}
 
-      {busquedaSolicitud.trim().length > 0 && (
+      {mostrarDropdown && (
         <div className="rn-finder__results">
           {pacientesParaSolicitud.length === 0 ? (
             <div className="rn-finder__empty">Sin resultados</div>

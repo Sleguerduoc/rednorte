@@ -4,6 +4,7 @@ import cl.rednorte.pacientes.model.Paciente;
 import cl.rednorte.pacientes.service.PacienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,5 +29,11 @@ public class PacienteController {
     @GetMapping("/{id}")
     public Paciente buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }

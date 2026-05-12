@@ -6,10 +6,10 @@ import ListHeader from "../common/ListHeader";
 function TimelineReasignaciones({ pacientesPorId, reasignaciones }) {
   return (
     <div>
-      <ListHeader count={reasignaciones.length} label="Reasignaciones" />
+      <ListHeader count={reasignaciones.length} label="Cancelaciones" />
       <div className="rn-timeline">
         {reasignaciones.length === 0 ? (
-          <div className="rn-empty">No hay reasignaciones registradas.</div>
+          <div className="rn-empty">No hay cancelaciones registradas.</div>
         ) : (
           reasignaciones.slice().reverse().map((r) => {
             const paciente = pacientesPorId.get(Number(r.pacienteId));

@@ -15,8 +15,8 @@ function DashboardPage({ notificaciones, pacientes, pacientesPorId, reasignacion
       <div className="rn-panel">
         <div className="rn-panel__head">
           <div>
-            <h2 className="rn-panel__title">Actividad reciente</h2>
-            <p className="rn-panel__sub">Últimas reasignaciones por cancelación de cita.</p>
+            <h2 className="rn-panel__title">Cancelaciones recientes</h2>
+            <p className="rn-panel__sub">Pacientes notificados para reagendar tras cancelar una cita.</p>
           </div>
         </div>
         <TimelineReasignaciones reasignaciones={reasignaciones} pacientesPorId={pacientesPorId} />

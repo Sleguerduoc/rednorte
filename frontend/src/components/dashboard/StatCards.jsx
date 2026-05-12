@@ -4,7 +4,7 @@ function StatCards({ notificaciones, pacientes, reasignaciones, solicitudesActiv
   const stats = [
     { mod: "a", icon: "♥", value: pacientes.length,          label: "Pacientes activos"      },
     { mod: "b", icon: "⋯", value: solicitudesActivas.length,  label: "En lista de espera"     },
-    { mod: "c", icon: "↻", value: reasignaciones.length,      label: "Reasignaciones"         },
+    { mod: "c", icon: "↻", value: reasignaciones.length,      label: "Avisos de cancelación"  },
     { mod: "d", icon: "✉", value: notificaciones.length,      label: "Notificaciones emitidas" },
   ];
 
