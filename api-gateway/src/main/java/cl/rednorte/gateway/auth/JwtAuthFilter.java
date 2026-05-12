@@ -28,7 +28,11 @@ public class JwtAuthFilter implements WebFilter {
         HttpMethod method = exchange.getRequest().getMethod();
 
         // Rutas públicas
-        if (path.startsWith("/auth/") || method == HttpMethod.OPTIONS) {
+        if (path.startsWith("/auth/")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/webjars/")
+                || method == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
 

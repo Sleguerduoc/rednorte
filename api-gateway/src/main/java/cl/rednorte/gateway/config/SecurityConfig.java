@@ -29,6 +29,8 @@ public class SecurityConfig {
                 .authorizeExchange(auth -> auth
                         .pathMatchers("/auth/**").permitAll()
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers("/swagger-ui/**", "/swagger-ui.html",
+                                       "/v3/api-docs/**", "/webjars/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
