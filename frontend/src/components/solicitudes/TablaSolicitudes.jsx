@@ -25,8 +25,8 @@ function TablaSolicitudes({ solicitudes }) {
               solicitudes.map((s) => (
                 <tr key={s.id}>
                   <td>
-                    <div className="rn-td-name">{nombreCompleto(s.paciente) || `Paciente ${s.pacienteId}`}</div>
-                    <div className="rn-td-sub">{s.paciente?.rut || "Sin RUT"}</div>
+                    <div className="rn-td-name">{s.pacienteNombre || nombreCompleto(s.paciente) || `Paciente ${s.pacienteId}`}</div>
+                    <div className="rn-td-sub">{s.pacienteRut || s.paciente?.rut || "Sin RUT"}</div>
                   </td>
                   <td>{s.especialidad}</td>
                   <td>

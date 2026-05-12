@@ -3,7 +3,9 @@ package cl.rednorte.pacientes.service;
 import cl.rednorte.pacientes.model.Paciente;
 import cl.rednorte.pacientes.repository.PacienteRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -24,6 +26,14 @@ public class PacienteService {
 
     public Paciente buscarPorId(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Paciente no encontrado"));
+    }
+
+    public void eliminar(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Paciente no encontrado");
+        }
+        repository.deleteById(id);
     }
 }
