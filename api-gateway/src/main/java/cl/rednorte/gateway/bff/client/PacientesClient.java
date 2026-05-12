@@ -11,10 +11,8 @@ public class PacientesClient {
 
     private final WebClient webClient;
 
-    public PacientesClient(
-            WebClient.Builder builder,
-            @Value("${services.pacientes.url}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+    public PacientesClient(@Value("${services.pacientes.url}") String baseUrl) {
+        this.webClient = WebClient.create(baseUrl);
     }
 
     public Flux<PacienteDto> listar() {

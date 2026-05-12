@@ -11,10 +11,8 @@ public class ListaEsperaClient {
 
     private final WebClient webClient;
 
-    public ListaEsperaClient(
-            WebClient.Builder builder,
-            @Value("${services.lista-espera.url}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+    public ListaEsperaClient(@Value("${services.lista-espera.url}") String baseUrl) {
+        this.webClient = WebClient.create(baseUrl);
     }
 
     public Flux<SolicitudDto> listar() {

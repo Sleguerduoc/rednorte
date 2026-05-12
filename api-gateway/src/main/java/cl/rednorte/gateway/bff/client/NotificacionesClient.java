@@ -11,10 +11,8 @@ public class NotificacionesClient {
 
     private final WebClient webClient;
 
-    public NotificacionesClient(
-            WebClient.Builder builder,
-            @Value("${services.notificaciones.url}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+    public NotificacionesClient(@Value("${services.notificaciones.url}") String baseUrl) {
+        this.webClient = WebClient.create(baseUrl);
     }
 
     public Flux<NotificacionDto> listar() {

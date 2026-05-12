@@ -11,10 +11,8 @@ public class ReasignacionClient {
 
     private final WebClient webClient;
 
-    public ReasignacionClient(
-            WebClient.Builder builder,
-            @Value("${services.reasignacion.url}") String baseUrl) {
-        this.webClient = builder.baseUrl(baseUrl).build();
+    public ReasignacionClient(@Value("${services.reasignacion.url}") String baseUrl) {
+        this.webClient = WebClient.create(baseUrl);
     }
 
     public Flux<ReasignacionDto> listar() {
