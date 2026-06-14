@@ -7,6 +7,7 @@ import NotificacionesPage from "../pages/NotificacionesPage";
 import PacientesPage from "../pages/PacientesPage";
 import MisCitasPage from "../pages/cliente/MisCitasPage";
 import DoctorPage from "../pages/doctor/DoctorPage";
+import AdminPage from "../pages/AdminPage";
 import StyleguidePage from "../pages/StyleguidePage";
 
 const INICIO_POR_ROL = { ADMIN: "/dashboard", DOCTOR: "/doctor", CLIENTE: "/mis-citas" };
@@ -43,6 +44,7 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
       {/* ── ADMIN ──────────────────────────────────────────── */}
       {esAdmin && (
         <>
+          <Route path="/admin"     element={<AdminPage />} />
           <Route path="/dashboard" element={
             <DashboardPage
               dashboardStats={colecciones.dashboardStats}

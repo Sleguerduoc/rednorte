@@ -8,6 +8,7 @@ import rednorteLogo from "../assets/rednorte-logo.png";
 const NAV_POR_ROL = {
   ADMIN: [
     { to: "/dashboard",      label: "Dashboard",      icon: "◈" },
+    { to: "/admin",          label: "Sala del día",   icon: "◐" },
     { to: "/pacientes",      label: "Pacientes",       icon: "◉" },
     { to: "/listas-espera",  label: "Lista de espera", icon: "◎" },
     { to: "/citas",          label: "Citas",            icon: "◇" },

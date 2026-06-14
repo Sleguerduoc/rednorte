@@ -1649,3 +1649,139 @@ button, input, select, textarea { font: inherit; }
 }
 .rn-steps__item--done .rn-steps__label { color: var(--green); }
 .rn-steps__line--done { background: var(--green); }
+
+/* ══════════════════════════════════════════
+   ADMIN TABS (sub-navegación dentro de panel)
+   ══════════════════════════════════════════ */
+.rn-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  padding: 0 26px;
+  background: var(--surface);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.rn-tabs::-webkit-scrollbar { display: none; }
+
+.rn-tab {
+  position: relative;
+  padding: 14px 20px;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .13s var(--ease);
+  line-height: 1;
+}
+.rn-tab:hover { color: var(--ink); }
+.rn-tab--active { color: var(--navy); }
+.rn-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--navy);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ══════════════════════════════════════════
+   ALERT BANNERS
+   ══════════════════════════════════════════ */
+.rn-alert {
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  font-size: .875rem;
+  border: 1px solid;
+  line-height: 1.4;
+}
+.rn-alert--info {
+  background: #EEF3FF;
+  border-color: #C7D7F5;
+  color: var(--navy);
+}
+.rn-alert--success {
+  background: var(--green-pale);
+  border-color: #B3E8D5;
+  color: var(--green);
+}
+.rn-alert--error {
+  background: var(--red-pale);
+  border-color: var(--red-light);
+  color: var(--red-deep);
+}
+
+/* ══════════════════════════════════════════
+   COMPACT STATS (sala del día)
+   ══════════════════════════════════════════ */
+.rn-stats--compact {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.rn-stats--compact .rn-stat {
+  padding: 16px 18px;
+}
+.rn-stats--compact .rn-stat__value {
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+.rn-stats--compact .rn-stat__icon {
+  width: 28px; height: 28px;
+  font-size: .875rem;
+  margin-bottom: 10px;
+}
+
+/* ══════════════════════════════════════════
+   WIZARD MODAL
+   ══════════════════════════════════════════ */
+.rn-wizard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 8, 26, 0.55);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(2px);
+}
+
+.rn-wizard {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.rn-wizard__head {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.rn-wizard__body {
+  padding: 24px 28px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.rn-wizard__foot {
+  padding: 16px 28px 22px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
