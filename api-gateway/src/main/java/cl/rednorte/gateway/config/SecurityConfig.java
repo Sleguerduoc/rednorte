@@ -31,6 +31,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/swagger-ui.html",
                                        "/v3/api-docs/**", "/webjars/**").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/ofertas/confirmar").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/ofertas/rechazar").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)

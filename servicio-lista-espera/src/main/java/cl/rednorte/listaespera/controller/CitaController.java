@@ -1,6 +1,7 @@
 package cl.rednorte.listaespera.controller;
 
 import cl.rednorte.listaespera.dto.AgendarCitaRequest;
+import cl.rednorte.listaespera.dto.AsignarCitaRequest;
 import cl.rednorte.listaespera.model.Cita;
 import cl.rednorte.listaespera.service.CitaService;
 import jakarta.validation.Valid;
@@ -30,6 +31,12 @@ public class CitaController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @RequestParam String especialidad) {
         return citaService.listarPorFechaYEspecialidad(fecha, especialidad);
+    }
+
+    @PostMapping("/asignar")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Cita asignar(@Valid @RequestBody AsignarCitaRequest request) {
+        return citaService.asignar(request);
     }
 
     @PostMapping("/{id}/check-in")

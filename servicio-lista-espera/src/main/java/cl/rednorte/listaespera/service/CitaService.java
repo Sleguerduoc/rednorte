@@ -1,6 +1,7 @@
 package cl.rednorte.listaespera.service;
 
 import cl.rednorte.listaespera.dto.AgendarCitaRequest;
+import cl.rednorte.listaespera.dto.AsignarCitaRequest;
 import cl.rednorte.listaespera.model.Cita;
 import cl.rednorte.listaespera.model.EstadoCita;
 import cl.rednorte.listaespera.model.EstadoSolicitud;
@@ -71,6 +72,39 @@ public class CitaService {
         cita.setEstado(EstadoCita.EN_SALA);
         cita.setHoraCheckIn(LocalDateTime.now());
         return citaRepository.save(cita);
+    }
+
+    @Transactional
+    public Cita asignar(AsignarCitaRequest request) {
+        Long solicitudIdFinal = request.getSolicitudId();
+
+        if (request.getCitaIdAReasignar() != null) {
+            Cita citaVieja = citaRepository.findById(request.getCitaIdAReasignar())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Cita a reasignar no encontrada: " + request.getCitaIdAReasignar()));
+
+            if (citaVieja.getEstado() != EstadoCita.PROGRAMADA) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Solo se puede reasignar una cita PROGRAMADA. Estado actual: " + citaVieja.getEstado());
+            }
+
+            solicitudIdFinal = citaVieja.getSolicitudId();
+            citaVieja.setEstado(EstadoCita.REASIGNADA);
+            citaRepository.save(citaVieja);
+        }
+
+        Cita nuevaCita = Cita.builder()
+                .solicitudId(solicitudIdFinal)
+                .pacienteId(request.getPacienteId())
+                .especialidad(request.getEspecialidad())
+                .fecha(java.time.LocalDate.parse(request.getFecha()))
+                .hora(java.time.LocalTime.parse(request.getHora()))
+                .estado(EstadoCita.PROGRAMADA)
+                .build();
+
+        return citaRepository.save(nuevaCita);
     }
 
     @Transactional

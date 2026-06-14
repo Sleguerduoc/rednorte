@@ -52,4 +52,9 @@ public class Oferta {
 
     @Column(nullable = false)
     private LocalDateTime expiraEn;
+
+    private String prioridadMinima;  // null = sin filtro; se republica al rechazar/expirar
+
+    @Version
+    private Long version;
 }

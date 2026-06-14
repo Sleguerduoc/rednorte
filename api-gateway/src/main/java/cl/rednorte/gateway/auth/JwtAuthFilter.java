@@ -32,7 +32,9 @@ public class JwtAuthFilter implements WebFilter {
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/webjars/")
-                || method == HttpMethod.OPTIONS) {
+                || method == HttpMethod.OPTIONS
+                || (method == HttpMethod.POST && path.equals("/ofertas/confirmar"))
+                || (method == HttpMethod.POST && path.equals("/ofertas/rechazar"))) {
             return chain.filter(exchange);
         }
 
