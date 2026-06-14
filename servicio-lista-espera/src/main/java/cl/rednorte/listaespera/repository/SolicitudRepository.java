@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface SolicitudRepository extends JpaRepository<SolicitudListaEspera, Long> {
     List<SolicitudListaEspera> findByEstadoOrderByIdAsc(EstadoSolicitud estado);
+
+    List<SolicitudListaEspera> findByEspecialidadAndEstado(String especialidad, EstadoSolicitud estado);
 }

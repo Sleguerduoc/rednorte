@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String COLA_CITA_CANCELADA = "cita.cancelada";
+    public static final String COLA_CUPO_LIBERADO = "cupo.liberado";
 
     @Bean
     public Queue citaCanceladaQueue() {
@@ -16,7 +17,12 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public Queue cupoLiberadoQueue() {
+        return new Queue(COLA_CUPO_LIBERADO, true);
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jsonMessageConverter(com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 }
