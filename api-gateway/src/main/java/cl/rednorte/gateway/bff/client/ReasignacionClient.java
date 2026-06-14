@@ -1,5 +1,6 @@
 package cl.rednorte.gateway.bff.client;
 
+import cl.rednorte.gateway.bff.dto.OfertaDto;
 import cl.rednorte.gateway.bff.dto.ReasignacionDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,14 @@ public class ReasignacionClient {
                 .uri("/reasignaciones")
                 .retrieve()
                 .bodyToFlux(ReasignacionDto.class)
+                .onErrorResume(e -> Flux.empty());
+    }
+
+    public Flux<OfertaDto> listarOfertas() {
+        return webClient.get()
+                .uri("/ofertas")
+                .retrieve()
+                .bodyToFlux(OfertaDto.class)
                 .onErrorResume(e -> Flux.empty());
     }
 }

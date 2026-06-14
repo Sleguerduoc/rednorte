@@ -166,6 +166,12 @@ public class OfertaService {
         return vencidas.size();
     }
 
+    // ── Consultas ────────────────────────────────────────────────────────────
+
+    public List<Oferta> listarTodas() {
+        return ofertaRepository.findAll();
+    }
+
     // ── Helpers privados ─────────────────────────────────────────────────────
 
     private void republicarCupo(Oferta oferta, List<Long> excluidos) {

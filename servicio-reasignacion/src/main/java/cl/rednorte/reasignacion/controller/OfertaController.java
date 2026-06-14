@@ -35,4 +35,10 @@ public class OfertaController {
         int procesadas = ofertaService.revisarVencidas();
         return ResponseEntity.ok(Map.of("procesadas", procesadas));
     }
+
+    /** Admin — requiere JWT. Para el panel BFF de ofertas. */
+    @GetMapping
+    public java.util.List<cl.rednorte.reasignacion.model.Oferta> listar() {
+        return ofertaService.listarTodas();
+    }
 }

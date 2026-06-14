@@ -48,4 +48,15 @@ public class CitaController {
     public Cita deshacerCheckIn(@PathVariable Long id) {
         return citaService.deshacerCheckIn(id);
     }
+
+    @PostMapping("/{id}/no-show")
+    public Cita noShow(@PathVariable Long id) {
+        return citaService.marcarNoShow(id);
+    }
+
+    @GetMapping("/del-dia")
+    public List<Cita> listarDelDia(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        return citaService.listarPorFecha(fecha);
+    }
 }
