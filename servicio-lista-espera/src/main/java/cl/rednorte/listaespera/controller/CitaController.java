@@ -31,4 +31,14 @@ public class CitaController {
             @RequestParam String especialidad) {
         return citaService.listarPorFechaYEspecialidad(fecha, especialidad);
     }
+
+    @PostMapping("/{id}/check-in")
+    public Cita checkIn(@PathVariable Long id) {
+        return citaService.checkIn(id);
+    }
+
+    @PostMapping("/{id}/deshacer-check-in")
+    public Cita deshacerCheckIn(@PathVariable Long id) {
+        return citaService.deshacerCheckIn(id);
+    }
 }

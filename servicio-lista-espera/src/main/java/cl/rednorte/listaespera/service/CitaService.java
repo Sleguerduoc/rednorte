@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -51,5 +52,39 @@ public class CitaService {
 
     public List<Cita> listarPorFechaYEspecialidad(LocalDate fecha, String especialidad) {
         return citaRepository.findByFechaAndEspecialidadOrderByHoraAsc(fecha, especialidad);
+    }
+
+    @Transactional
+    public Cita checkIn(Long id) {
+        Cita cita = citaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Cita no encontrada: " + id));
+
+        if (!"PROGRAMADA".equals(cita.getEstado())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Check-in solo permitido en estado PROGRAMADA. Estado actual: " + cita.getEstado());
+        }
+
+        cita.setEstado("EN_SALA");
+        cita.setHoraCheckIn(LocalDateTime.now());
+        return citaRepository.save(cita);
+    }
+
+    @Transactional
+    public Cita deshacerCheckIn(Long id) {
+        Cita cita = citaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Cita no encontrada: " + id));
+
+        if (!"EN_SALA".equals(cita.getEstado())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Deshacer check-in solo permitido en estado EN_SALA. Estado actual: " + cita.getEstado());
+        }
+
+        cita.setEstado("PROGRAMADA");
+        cita.setHoraCheckIn(null);
+        return citaRepository.save(cita);
     }
 }
