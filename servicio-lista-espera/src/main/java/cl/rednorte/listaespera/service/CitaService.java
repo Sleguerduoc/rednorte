@@ -2,6 +2,8 @@ package cl.rednorte.listaespera.service;
 
 import cl.rednorte.listaespera.dto.AgendarCitaRequest;
 import cl.rednorte.listaespera.model.Cita;
+import cl.rednorte.listaespera.model.EstadoCita;
+import cl.rednorte.listaespera.model.EstadoSolicitud;
 import cl.rednorte.listaespera.model.SolicitudListaEspera;
 import cl.rednorte.listaespera.repository.CitaRepository;
 import cl.rednorte.listaespera.repository.SolicitudRepository;
@@ -29,7 +31,7 @@ public class CitaService {
                         HttpStatus.NOT_FOUND,
                         "Solicitud no encontrada: " + request.getSolicitudId()));
 
-        if (!"PENDIENTE".equals(solicitud.getEstado())) {
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Solo se pueden agendar solicitudes en estado PENDIENTE. Estado actual: " + solicitud.getEstado());
@@ -41,10 +43,10 @@ public class CitaService {
                 .especialidad(solicitud.getEspecialidad())
                 .fecha(request.getFecha())
                 .hora(request.getHora())
-                .estado("PROGRAMADA")
+                .estado(EstadoCita.PROGRAMADA)
                 .build();
 
-        solicitud.setEstado("AGENDADA");
+        solicitud.setEstado(EstadoSolicitud.AGENDADA);
         solicitudRepository.save(solicitud);
 
         return citaRepository.save(cita);
@@ -60,13 +62,13 @@ public class CitaService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Cita no encontrada: " + id));
 
-        if (!"PROGRAMADA".equals(cita.getEstado())) {
+        if (cita.getEstado() != EstadoCita.PROGRAMADA) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Check-in solo permitido en estado PROGRAMADA. Estado actual: " + cita.getEstado());
         }
 
-        cita.setEstado("EN_SALA");
+        cita.setEstado(EstadoCita.EN_SALA);
         cita.setHoraCheckIn(LocalDateTime.now());
         return citaRepository.save(cita);
     }
@@ -77,13 +79,13 @@ public class CitaService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Cita no encontrada: " + id));
 
-        if (!"EN_SALA".equals(cita.getEstado())) {
+        if (cita.getEstado() != EstadoCita.EN_SALA) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Deshacer check-in solo permitido en estado EN_SALA. Estado actual: " + cita.getEstado());
         }
 
-        cita.setEstado("PROGRAMADA");
+        cita.setEstado(EstadoCita.PROGRAMADA);
         cita.setHoraCheckIn(null);
         return citaRepository.save(cita);
     }
