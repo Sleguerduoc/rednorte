@@ -10,6 +10,7 @@ public class RabbitConfig {
 
     public static final String COLA_CITA_CANCELADA = "cita.cancelada";
     public static final String COLA_NOTIFICACION_SOLICITADA = "notificacion.solicitada";
+    public static final String COLA_CUPO_LIBERADO = "cupo.liberado";
 
     @Bean
     public Queue citaCanceladaQueue() {
@@ -20,8 +21,14 @@ public class RabbitConfig {
     public Queue notificacionSolicitadaQueue() {
         return new Queue(COLA_NOTIFICACION_SOLICITADA, true);
     }
+
+    @Bean
+    public Queue cupoLiberadoQueue() {
+        return new Queue(COLA_CUPO_LIBERADO, true);
+    }
+
     @Bean
     public Jackson2JsonMessageConverter jsonMessageConverter() {
-    return new Jackson2JsonMessageConverter();
-}
+        return new Jackson2JsonMessageConverter();
+    }
 }

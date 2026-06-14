@@ -65,4 +65,37 @@ export const rednorteApi = {
   eliminarPaciente(id) {
     return axios.delete(`${API_URL}/pacientes/${id}`, { headers: authHeaders() });
   },
+
+  // ── Admin / Sala del día ────────────────────────────────────────
+  salaDelDia(fecha) {
+    return axios.get(`${API_URL}/bff/sala-del-dia`, { params: { fecha }, headers: authHeaders() });
+  },
+
+  listaEsperaPendiente() {
+    return axios.get(`${API_URL}/bff/lista-espera`, { headers: authHeaders() });
+  },
+
+  ofertas() {
+    return axios.get(`${API_URL}/bff/ofertas`, { headers: authHeaders() });
+  },
+
+  agendarCita(solicitudId, fecha, hora) {
+    return axios.post(`${API_URL}/citas/agendar`, { solicitudId, fecha, hora }, { headers: authHeaders() });
+  },
+
+  checkIn(citaId) {
+    return axios.post(`${API_URL}/citas/${citaId}/check-in`, null, { headers: authHeaders() });
+  },
+
+  noShow(citaId) {
+    return axios.post(`${API_URL}/citas/${citaId}/no-show`, null, { headers: authHeaders() });
+  },
+
+  atenderCita(citaId) {
+    return axios.post(`${API_URL}/citas/${citaId}/atender`, null, { headers: authHeaders() });
+  },
+
+  revisarVencidas() {
+    return axios.post(`${API_URL}/ofertas/revisar-vencidas`, null, { headers: authHeaders() });
+  },
 };

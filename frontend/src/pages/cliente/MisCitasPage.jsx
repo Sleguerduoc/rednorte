@@ -86,7 +86,7 @@ function MisCitasPage({ cancelarCita, cancelandoCitaId, solicitudesActivas, paci
             <button
               type="button"
               className="rn-btn rn-btn--primary"
-              onClick={() => navigate("/listas-espera")}
+              onClick={() => navigate("/agendar")}
             >
               + Agendar una hora
             </button>
@@ -103,7 +103,7 @@ function MisCitasPage({ cancelarCita, cancelandoCitaId, solicitudesActivas, paci
             <button
               type="button"
               className="rn-btn rn-btn--primary"
-              onClick={() => navigate("/listas-espera")}
+              onClick={() => navigate("/agendar")}
             >
               + Solicitar una hora
             </button>

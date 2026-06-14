@@ -7,6 +7,10 @@ import NotificacionesPage from "../pages/NotificacionesPage";
 import PacientesPage from "../pages/PacientesPage";
 import MisCitasPage from "../pages/cliente/MisCitasPage";
 import DoctorPage from "../pages/doctor/DoctorPage";
+import AdminPage from "../pages/AdminPage";
+import DoctorAgendaPage from "../pages/doctor/DoctorAgendaPage";
+import StyleguidePage from "../pages/StyleguidePage";
+import PacienteAgendarPage from "../pages/cliente/PacienteAgendarPage";
 
 const INICIO_POR_ROL = { ADMIN: "/dashboard", DOCTOR: "/doctor", CLIENTE: "/mis-citas" };
 
@@ -35,12 +39,14 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
 
   return (
     <Routes>
-      <Route path="/"  element={<Inicio />} />
-      <Route path="*"  element={<Inicio />} />
+      <Route path="/"           element={<Inicio />} />
+      <Route path="/styleguide" element={<StyleguidePage />} />
+      <Route path="*"           element={<Inicio />} />
 
       {/* ── ADMIN ──────────────────────────────────────────── */}
       {esAdmin && (
         <>
+          <Route path="/admin"     element={<AdminPage />} />
           <Route path="/dashboard" element={
             <DashboardPage
               dashboardStats={colecciones.dashboardStats}
@@ -102,6 +108,7 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
       {/* ── DOCTOR ─────────────────────────────────────────── */}
       {esDoctor && (
         <>
+          <Route path="/agenda" element={<DoctorAgendaPage />} />
           <Route path="/doctor" element={
             <DoctorPage
               cancelarCita={acciones.cancelarCita}
@@ -133,6 +140,9 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
       )}
 
       {/* ── CLIENTE ────────────────────────────────────────── */}
+      <Route path="/agendar" element={
+        <PacienteAgendarPage onSuccess={acciones.cargarDatos} />
+      } />
       <Route path="/mis-citas" element={
         <MisCitasPage
           cancelarCita={acciones.cancelarCita}

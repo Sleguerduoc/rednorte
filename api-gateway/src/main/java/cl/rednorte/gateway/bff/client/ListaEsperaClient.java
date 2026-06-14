@@ -1,5 +1,6 @@
 package cl.rednorte.gateway.bff.client;
 
+import cl.rednorte.gateway.bff.dto.CitaDto;
 import cl.rednorte.gateway.bff.dto.SolicitudDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,14 @@ public class ListaEsperaClient {
                 .uri("/listas-espera")
                 .retrieve()
                 .bodyToFlux(SolicitudDto.class)
+                .onErrorResume(e -> Flux.empty());
+    }
+
+    public Flux<CitaDto> listarCitasDelDia(String fecha) {
+        return webClient.get()
+                .uri(u -> u.path("/citas/del-dia").queryParam("fecha", fecha).build())
+                .retrieve()
+                .bodyToFlux(CitaDto.class)
                 .onErrorResume(e -> Flux.empty());
     }
 }
