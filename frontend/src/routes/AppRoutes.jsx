@@ -8,6 +8,7 @@ import PacientesPage from "../pages/PacientesPage";
 import MisCitasPage from "../pages/cliente/MisCitasPage";
 import DoctorPage from "../pages/doctor/DoctorPage";
 import AdminPage from "../pages/AdminPage";
+import DoctorAgendaPage from "../pages/doctor/DoctorAgendaPage";
 import StyleguidePage from "../pages/StyleguidePage";
 
 const INICIO_POR_ROL = { ADMIN: "/dashboard", DOCTOR: "/doctor", CLIENTE: "/mis-citas" };
@@ -106,6 +107,7 @@ function AppRoutes({ acciones, busquedas, colecciones, estado, prepararSolicitud
       {/* ── DOCTOR ─────────────────────────────────────────── */}
       {esDoctor && (
         <>
+          <Route path="/agenda" element={<DoctorAgendaPage />} />
           <Route path="/doctor" element={
             <DoctorPage
               cancelarCita={acciones.cancelarCita}

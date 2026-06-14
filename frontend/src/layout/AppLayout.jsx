@@ -15,7 +15,8 @@ const NAV_POR_ROL = {
     { to: "/notificaciones", label: "Notificaciones",  icon: "◬" },
   ],
   DOCTOR: [
-    { to: "/doctor",       label: "Pacientes",       icon: "◉" },
+    { to: "/agenda",       label: "Mi agenda",        icon: "◐" },
+    { to: "/doctor",       label: "Pacientes",        icon: "◉" },
     { to: "/listas-espera", label: "Agendar / Cupo",  icon: "◎" },
   ],
   CLIENTE: [
