@@ -9,10 +9,16 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     public static final String COLA_CITA_CANCELADA = "cita.cancelada";
+    public static final String COLA_CUPO_LIBERADO = "cupo.liberado";
 
     @Bean
     public Queue citaCanceladaQueue() {
         return new Queue(COLA_CITA_CANCELADA, true);
+    }
+
+    @Bean
+    public Queue cupoLiberadoQueue() {
+        return new Queue(COLA_CUPO_LIBERADO, true);
     }
 
     @Bean

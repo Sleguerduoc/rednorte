@@ -8,18 +8,20 @@ import rednorteLogo from "../assets/rednorte-logo.png";
 const NAV_POR_ROL = {
   ADMIN: [
     { to: "/dashboard",      label: "Dashboard",      icon: "◈" },
+    { to: "/admin",          label: "Sala del día",   icon: "◐" },
     { to: "/pacientes",      label: "Pacientes",       icon: "◉" },
     { to: "/listas-espera",  label: "Lista de espera", icon: "◎" },
     { to: "/citas",          label: "Citas",            icon: "◇" },
     { to: "/notificaciones", label: "Notificaciones",  icon: "◬" },
   ],
   DOCTOR: [
-    { to: "/doctor",       label: "Pacientes",       icon: "◉" },
+    { to: "/agenda",       label: "Mi agenda",        icon: "◐" },
+    { to: "/doctor",       label: "Pacientes",        icon: "◉" },
     { to: "/listas-espera", label: "Agendar / Cupo",  icon: "◎" },
   ],
   CLIENTE: [
-    { to: "/mis-citas",    label: "Mis citas",    icon: "◇" },
-    { to: "/listas-espera", label: "Agendar hora", icon: "＋" },
+    { to: "/mis-citas", label: "Mis citas",    icon: "◇" },
+    { to: "/agendar",   label: "Agendar hora", icon: "＋" },
   ],
 };
 

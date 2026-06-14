@@ -26,9 +26,11 @@ public class SolicitudListaEspera {
     @NotBlank
     private String especialidad;
 
-    private String prioridad;
+    @Enumerated(EnumType.STRING)
+    private PrioridadSolicitud prioridad;
 
-    private String estado;
+    @Enumerated(EnumType.STRING)
+    private EstadoSolicitud estado;
 
     private LocalDateTime fechaRegistro;
 }
