@@ -47,6 +47,19 @@ public class CitaService {
                     "Solo se pueden agendar solicitudes en estado PENDIENTE. Estado actual: " + solicitud.getEstado());
         }
 
+        boolean cupoOcupado = citaRepository.existsByEspecialidadAndFechaAndHoraAndEstadoIn(
+                solicitud.getEspecialidad(),
+                request.getFecha(),
+                request.getHora(),
+                List.of(EstadoCita.PROGRAMADA, EstadoCita.EN_SALA));
+        if (cupoOcupado) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El cupo de " + solicitud.getEspecialidad()
+                    + " el " + request.getFecha()
+                    + " a las " + request.getHora()
+                    + " ya está ocupado. Por favor elige otra hora.");
+        }
+
         Cita cita = Cita.builder()
                 .solicitudId(solicitud.getId())
                 .pacienteId(solicitud.getPacienteId())

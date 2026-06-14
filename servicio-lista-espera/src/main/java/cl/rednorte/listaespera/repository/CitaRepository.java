@@ -18,4 +18,8 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
 
     // Para el BFF sala-del-día: todas las citas de una fecha, ordenadas por especialidad y hora
     List<Cita> findByFechaOrderByEspecialidadAscHoraAsc(LocalDate fecha);
+
+    // Anti-doble-reserva: ¿ya existe un cupo activo para esa especialidad+fecha+hora?
+    boolean existsByEspecialidadAndFechaAndHoraAndEstadoIn(
+            String especialidad, LocalDate fecha, java.time.LocalTime hora, java.util.List<EstadoCita> estados);
 }

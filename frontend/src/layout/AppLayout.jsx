@@ -20,8 +20,8 @@ const NAV_POR_ROL = {
     { to: "/listas-espera", label: "Agendar / Cupo",  icon: "◎" },
   ],
   CLIENTE: [
-    { to: "/mis-citas",    label: "Mis citas",    icon: "◇" },
-    { to: "/listas-espera", label: "Agendar hora", icon: "＋" },
+    { to: "/mis-citas", label: "Mis citas",    icon: "◇" },
+    { to: "/agendar",   label: "Agendar hora", icon: "＋" },
   ],
 };
 
