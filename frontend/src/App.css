@@ -1479,6 +1479,21 @@ button, input, select, textarea { font: inherit; }
 .rn-badge--reasignada  { background: #DDE8FF;            color: var(--navy);  }
 
 /* ══════════════════════════════════════════
+   STATUS BADGE — estados de Oferta
+   ══════════════════════════════════════════ */
+.rn-badge--ofrecida   { background: #EEF3FF;            color: #3B63CB;      }
+.rn-badge--confirmada { background: var(--green-pale);  color: var(--green); }
+.rn-badge--rechazada  { background: var(--red-pale);    color: var(--red);   }
+.rn-badge--expirada   { background: var(--paper);       color: var(--muted); border: 1px solid var(--border); }
+
+/* ══════════════════════════════════════════
+   STATUS BADGE — estados de SolicitudListaEspera
+   (atendida y cancelada ya existen arriba)
+   ══════════════════════════════════════════ */
+.rn-badge--pendiente  { background: var(--amber-pale);  color: var(--amber); }
+.rn-badge--agendada   { background: var(--green-pale);  color: var(--green); }
+
+/* ══════════════════════════════════════════
    HORA CHIP
    ══════════════════════════════════════════ */
 .rn-hora-chip {

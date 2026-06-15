@@ -15,7 +15,7 @@ export function useDoctorAgenda() {
 
   const mostrar = (tipo, texto) => {
     setBanner({ tipo, texto });
-    setTimeout(() => setBanner(null), 5000);
+    setTimeout(() => setBanner(null), tipo === "error" ? 7000 : 5000);
   };
 
   const cargarCitas = useCallback(async () => {

@@ -18,14 +18,14 @@ export const estadoInicialLista = {
 };
 
 export const ESPECIALIDADES = [
-  "Cardiologia",
-  "Dermatologia",
-  "Ginecologia",
+  "Cardiología",
+  "Dermatología",
+  "Ginecología",
   "Medicina interna",
-  "Neurologia",
-  "Oftalmologia",
-  "Pediatria",
-  "Traumatologia",
+  "Neurología",
+  "Oftalmología",
+  "Pediatría",
+  "Traumatología",
 ];
 
 export const SEXOS = [
@@ -39,6 +39,13 @@ export const PREVISIONES = [
   { value: "ISAPRE",  label: "ISAPRE"  },
   { value: "NINGUNA", label: "Sin previsión" },
 ];
+
+export const ETIQUETAS_SOLICITUD = {
+  PENDIENTE: "En espera",
+  AGENDADA:  "Agendada",
+  ATENDIDA:  "Atendida",
+  CANCELADA: "Cancelada",
+};
 
 export const ETIQUETAS_CITA = {
   PROGRAMADA: "Programada",
