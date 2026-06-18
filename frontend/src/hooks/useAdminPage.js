@@ -14,6 +14,7 @@ export function useAdminPage() {
   const [citas, setCitas]               = useState([]);
   const [cargandoSala, setCargandoSala] = useState(false);
   const [cupoLiberado, setCupoLiberado] = useState(false);
+  const [cargandoAccion, setCargandoAccion] = useState(false);
 
   // ── Lista de espera ─────────────────────────────────────────────
   const [solicitudes, setSolicitudes]       = useState([]);
@@ -34,7 +35,7 @@ export function useAdminPage() {
 
   const mostrar = (tipo, texto) => {
     setBanner({ tipo, texto });
-    setTimeout(() => setBanner(null), 5000);
+    setTimeout(() => setBanner(null), tipo === "error" ? 7000 : 5000);
   };
 
   // ── Loaders ─────────────────────────────────────────────────────
@@ -80,16 +81,20 @@ export function useAdminPage() {
 
   // ── Acciones de sala ────────────────────────────────────────────
   const doCheckIn = async (citaId) => {
+    setCargandoAccion(true);
     try {
       await rednorteApi.checkIn(citaId);
       mostrar("exito", "Check-in registrado.");
       cargarSala();
     } catch (e) {
       mostrar("error", obtenerMensajeError(e, "Error al registrar check-in."));
+    } finally {
+      setCargandoAccion(false);
     }
   };
 
   const doNoShow = async (citaId) => {
+    setCargandoAccion(true);
     try {
       await rednorteApi.noShow(citaId);
       mostrar("exito", "No-show registrado. El sistema buscará candidatos para el cupo liberado.");
@@ -97,16 +102,21 @@ export function useAdminPage() {
       cargarSala();
     } catch (e) {
       mostrar("error", obtenerMensajeError(e, "Error al registrar no-show."));
+    } finally {
+      setCargandoAccion(false);
     }
   };
 
   const doAtender = async (citaId) => {
+    setCargandoAccion(true);
     try {
       await rednorteApi.atenderCita(citaId);
       mostrar("exito", "Cita marcada como atendida.");
       cargarSala();
     } catch (e) {
       mostrar("error", obtenerMensajeError(e, "Error al marcar como atendida."));
+    } finally {
+      setCargandoAccion(false);
     }
   };
 
@@ -189,6 +199,7 @@ export function useAdminPage() {
     especialidad, setEspecialidad,
     citas: citasDeEspecialidad,
     cargandoSala,
+    cargandoAccion,
     cupoLiberado, setCupoLiberado,
     cargarSala,
     doCheckIn, doNoShow, doAtender,

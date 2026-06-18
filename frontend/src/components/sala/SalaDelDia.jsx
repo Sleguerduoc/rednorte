@@ -10,6 +10,7 @@ export default function SalaDelDia({
   fecha, setFecha,
   especialidad, setEspecialidad,
   citas, cargando,
+  cargandoAccion,
   cupoLiberado, setCupoLiberado,
   onCheckIn, onNoShow, onAtender,
   onActualizar, onVerOfertas,
@@ -115,16 +116,16 @@ export default function SalaDelDia({
                   <td>
                     <div style={{ display: "flex", gap: 6 }}>
                       {cita.estado === "EN_SALA" && (
-                        <button type="button" className="rn-btn rn-btn--primary rn-btn--sm" onClick={() => onAtender(cita.id)}>
+                        <button type="button" className="rn-btn rn-btn--primary rn-btn--sm" disabled={cargandoAccion} onClick={() => onAtender(cita.id)}>
                           Atender
                         </button>
                       )}
                       {cita.estado === "PROGRAMADA" && (
                         <>
-                          <button type="button" className="rn-btn rn-btn--secondary rn-btn--sm" onClick={() => onCheckIn(cita.id)}>
+                          <button type="button" className="rn-btn rn-btn--secondary rn-btn--sm" disabled={cargandoAccion} onClick={() => onCheckIn(cita.id)}>
                             Check-in
                           </button>
-                          <button type="button" className="rn-btn rn-btn--danger rn-btn--sm" onClick={() => onNoShow(cita.id)}>
+                          <button type="button" className="rn-btn rn-btn--danger rn-btn--sm" disabled={cargandoAccion} onClick={() => onNoShow(cita.id)}>
                             No asistió
                           </button>
                         </>
@@ -146,9 +147,10 @@ SalaDelDia.propTypes = {
   setFecha:       PropTypes.func.isRequired,
   especialidad:   PropTypes.string.isRequired,
   setEspecialidad: PropTypes.func.isRequired,
-  citas:          PropTypes.array.isRequired,
-  cargando:       PropTypes.bool.isRequired,
-  cupoLiberado:   PropTypes.bool.isRequired,
+  citas:           PropTypes.array.isRequired,
+  cargando:        PropTypes.bool.isRequired,
+  cargandoAccion:  PropTypes.bool.isRequired,
+  cupoLiberado:    PropTypes.bool.isRequired,
   setCupoLiberado: PropTypes.func.isRequired,
   onCheckIn:      PropTypes.func.isRequired,
   onNoShow:       PropTypes.func.isRequired,

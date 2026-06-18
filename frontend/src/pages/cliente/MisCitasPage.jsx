@@ -1,20 +1,16 @@
 import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import StatusBadge from "../../components/common/StatusBadge";
 import { useAuth } from "../../context/AuthContext";
 import { formatearFecha } from "../../utils/date";
-import { nombreCompleto, normalizar } from "../../utils/text";
+import { nombreCompleto } from "../../utils/text";
 
 function labelBotonCancelar(cancelando, confirmando) {
   if (cancelando)   return "Cancelando…";
   if (confirmando)  return "¿Cancelar?";
   return "✕";
 }
-
-const ESTADO_BADGE = {
-  ACTIVO:    "rn-badge--activo",
-  CANCELADA: "rn-badge--default",
-};
 
 function MisCitasPage({ cancelarCita, cancelandoCitaId, solicitudesActivas, pacientesPorId }) {
   const { user } = useAuth();
@@ -130,17 +126,9 @@ function MisCitasPage({ cancelarCita, cancelandoCitaId, solicitudesActivas, paci
                     <tr key={cita.id}>
                       <td className="rn-td-id">#{cita.id}</td>
                       <td className="rn-td-name">{cita.especialidad}</td>
-                      <td>
-                        <span className={`rn-badge rn-badge--${normalizar(cita.prioridad)}`}>
-                          {cita.prioridad}
-                        </span>
-                      </td>
+                      <td><StatusBadge value={cita.prioridad} /></td>
                       <td className="rn-td-id">{formatearFecha(cita.fechaRegistro)}</td>
-                      <td>
-                        <span className={`rn-badge ${ESTADO_BADGE[cita.estado] ?? "rn-badge--default"}`}>
-                          {cita.estado}
-                        </span>
-                      </td>
+                      <td><StatusBadge value={cita.estado} /></td>
                       <td>
                         <button
                           type="button"
