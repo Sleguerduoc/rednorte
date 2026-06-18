@@ -128,4 +128,23 @@ class SolicitudServiceTest {
         verify(rabbitTemplate, never())
                 .convertAndSend(eq(RabbitConfig.COLA_CUPO_LIBERADO), any(CupoLiberadoEvent.class));
     }
+
+    @Test
+    void cancelarCita_solicitudAsociadaNoExiste_noFallaYSigueElFlujo() {
+        Cita cita = Cita.builder().id(103L).solicitudId(999L).pacienteId(4L)
+                .especialidad("Cardiologia").fecha(LocalDate.now().plusDays(2))
+                .hora(LocalTime.of(9, 0)).estado(EstadoCita.PROGRAMADA).build();
+
+        when(citaRepository.findById(103L)).thenReturn(Optional.of(cita));
+        when(repository.findById(999L)).thenReturn(Optional.empty());
+
+        solicitudService.cancelarCita(103L, 4L, "Cardiologia", "2026-06-20");
+
+        assertEquals(EstadoCita.CANCELADA, cita.getEstado());
+        verify(repository, never()).save(any(SolicitudListaEspera.class));
+        verify(rabbitTemplate, times(1))
+                .convertAndSend(eq(RabbitConfig.COLA_CITA_CANCELADA), any(CitaCanceladaEvent.class));
+        verify(rabbitTemplate, times(1))
+                .convertAndSend(eq(RabbitConfig.COLA_CUPO_LIBERADO), any(CupoLiberadoEvent.class));
+    }
 }

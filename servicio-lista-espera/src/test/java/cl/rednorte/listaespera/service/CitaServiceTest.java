@@ -2,6 +2,7 @@ package cl.rednorte.listaespera.service;
 
 import cl.rednorte.listaespera.config.RabbitConfig;
 import cl.rednorte.listaespera.dto.AgendarCitaRequest;
+import cl.rednorte.listaespera.dto.AsignarCitaRequest;
 import cl.rednorte.listaespera.event.CupoLiberadoEvent;
 import cl.rednorte.listaespera.model.Cita;
 import cl.rednorte.listaespera.model.EstadoCita;
@@ -193,5 +194,115 @@ class CitaServiceTest {
 
         assertEquals(EstadoCita.NO_SHOW, resultado.getEstado());
         verify(rabbitTemplate, never()).convertAndSend(any(String.class), any(Object.class));
+    }
+
+    @Test
+    void deshacerCheckIn_desdeEnSala_marcaProgramadaYLimpiaHoraCheckIn() {
+        Cita cita = Cita.builder().id(1L).estado(EstadoCita.EN_SALA)
+                .horaCheckIn(java.time.LocalDateTime.now()).build();
+        when(citaRepository.findById(1L)).thenReturn(Optional.of(cita));
+        when(citaRepository.save(any(Cita.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Cita resultado = citaService.deshacerCheckIn(1L);
+
+        assertEquals(EstadoCita.PROGRAMADA, resultado.getEstado());
+        assertEquals(null, resultado.getHoraCheckIn());
+    }
+
+    @Test
+    void deshacerCheckIn_desdeEstadoInvalido_lanzaConflicto() {
+        Cita cita = Cita.builder().id(1L).estado(EstadoCita.PROGRAMADA).build();
+        when(citaRepository.findById(1L)).thenReturn(Optional.of(cita));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> citaService.deshacerCheckIn(1L));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(citaRepository, never()).save(any());
+    }
+
+    private AsignarCitaRequest asignarRequest(Long solicitudId, Long citaIdAReasignar) {
+        AsignarCitaRequest request = new AsignarCitaRequest();
+        request.setPacienteId(1L);
+        request.setEspecialidad("Cardiologia");
+        request.setFecha("2026-06-20");
+        request.setHora("09:00");
+        request.setSolicitudId(solicitudId);
+        request.setCitaIdAReasignar(citaIdAReasignar);
+        return request;
+    }
+
+    @Test
+    void asignar_sinCitaAReasignar_usaSolicitudIdDelRequest() {
+        AsignarCitaRequest request = asignarRequest(7L, null);
+
+        when(citaRepository.save(any(Cita.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Cita resultado = citaService.asignar(request);
+
+        assertEquals(7L, resultado.getSolicitudId());
+        assertEquals(1L, resultado.getPacienteId());
+        assertEquals(EstadoCita.PROGRAMADA, resultado.getEstado());
+        verify(citaRepository, never()).findById(any());
+    }
+
+    @Test
+    void asignar_conCitaAReasignar_marcaViejaReasignadaYUsaSuSolicitudId() {
+        Cita citaVieja = Cita.builder().id(50L).solicitudId(99L)
+                .estado(EstadoCita.PROGRAMADA).build();
+
+        AsignarCitaRequest request = asignarRequest(7L, 50L);
+
+        when(citaRepository.findById(50L)).thenReturn(Optional.of(citaVieja));
+        when(citaRepository.save(any(Cita.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Cita resultado = citaService.asignar(request);
+
+        assertEquals(EstadoCita.REASIGNADA, citaVieja.getEstado());
+        assertEquals(99L, resultado.getSolicitudId());
+        verify(citaRepository).save(citaVieja);
+        verify(citaRepository, times(2)).save(any(Cita.class));
+    }
+
+    @Test
+    void asignar_citaAReasignarNoProgramada_lanzaConflictoYNoGuardaNada() {
+        Cita citaVieja = Cita.builder().id(50L).solicitudId(99L)
+                .estado(EstadoCita.EN_SALA).build();
+
+        AsignarCitaRequest request = asignarRequest(null, 50L);
+
+        when(citaRepository.findById(50L)).thenReturn(Optional.of(citaVieja));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> citaService.asignar(request));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(citaRepository, never()).save(any());
+    }
+
+    @Test
+    void asignar_citaAReasignarNoEncontrada_lanzaNotFound() {
+        AsignarCitaRequest request = asignarRequest(null, 404L);
+
+        when(citaRepository.findById(404L)).thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> citaService.asignar(request));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        verify(citaRepository, never()).save(any());
+    }
+
+    @Test
+    void listarPorFecha_delegaEnRepositorioYDevuelveLista() {
+        LocalDate hoy = LocalDate.now();
+        Cita cita = Cita.builder().id(1L).especialidad("Cardiologia").fecha(hoy).build();
+        when(citaRepository.findByFechaOrderByEspecialidadAscHoraAsc(hoy)).thenReturn(List.of(cita));
+
+        List<Cita> resultado = citaService.listarPorFecha(hoy);
+
+        assertEquals(1, resultado.size());
+        assertEquals(cita, resultado.get(0));
+        verify(citaRepository).findByFechaOrderByEspecialidadAscHoraAsc(hoy);
     }
 }
