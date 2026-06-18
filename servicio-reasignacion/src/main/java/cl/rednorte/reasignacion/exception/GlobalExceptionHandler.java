@@ -29,4 +29,11 @@ public class GlobalExceptionHandler {
         log.warn("Conflicto de concurrencia al procesar oferta: {}", ex.getMessage());
         return Map.of("error", "La oferta ya fue procesada por otra petición simultánea.");
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleGeneric(Exception ex) {
+        log.error("Error no controlado en reasignaciones", ex);
+        return Map.of("error", ex.getClass().getSimpleName(), "detalle", String.valueOf(ex.getMessage()));
+    }
 }
