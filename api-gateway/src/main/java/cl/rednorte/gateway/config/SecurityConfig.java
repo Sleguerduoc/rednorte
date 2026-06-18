@@ -1,6 +1,7 @@
 package cl.rednorte.gateway.config;
 
 import cl.rednorte.gateway.auth.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,11 +16,18 @@ import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
+
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+
+    @Value("${services.pacientes.url}")
+    private String pacientesUrl;
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http, JwtAuthFilter jwtAuthFilter) {
@@ -44,7 +52,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(false);
@@ -61,7 +71,7 @@ public class SecurityConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("http://localhost:8081")
+                .baseUrl(pacientesUrl)
                 .build();
     }
 }
