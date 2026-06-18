@@ -17,7 +17,7 @@ export default function AdminPage() {
     // Sala
     fecha, setFecha,
     especialidad, setEspecialidad,
-    citas, cargandoSala, cupoLiberado, setCupoLiberado,
+    citas, cargandoSala, cargandoAccion, cupoLiberado, setCupoLiberado,
     cargarSala, doCheckIn, doNoShow, doAtender,
     // Lista
     solicitudes, cargandoLista, cargarLista,
@@ -64,6 +64,7 @@ export default function AdminPage() {
             fecha={fecha}               setFecha={setFecha}
             especialidad={especialidad} setEspecialidad={setEspecialidad}
             citas={citas}               cargando={cargandoSala}
+            cargandoAccion={cargandoAccion}
             cupoLiberado={cupoLiberado} setCupoLiberado={setCupoLiberado}
             onCheckIn={doCheckIn}       onNoShow={doNoShow}
             onAtender={doAtender}       onActualizar={cargarSala}
