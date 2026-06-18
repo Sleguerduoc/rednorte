@@ -1,0 +1,188 @@
+# Fase D2 - Sistema RedNorte completo contenerizado (100% local).
+# Levanta las 4 bases + RabbitMQ + los 5 servicios Spring Boot + el frontend.
+# El docker-compose.yml original (solo bases) sigue intacto para quien
+# prefiera correr los servicios con `mvn spring-boot:run` a mano.
+
+services:
+  postgres-pacientes:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pacientes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pacientes_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pacientes_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-lista:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: lista_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - lista_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lista_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-reasignacion:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: reasignacion_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - reasignacion_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reasignacion_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-notificaciones:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: notificaciones_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - notificaciones_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notificaciones_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  servicio-pacientes:
+    build: ./servicio-pacientes
+    environment:
+      DB_URL: jdbc:postgresql://postgres-pacientes:5432/pacientes_db
+      DB_USER: postgres
+      DB_PASS: postgres
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-pacientes:
+        condition: service_healthy
+
+  servicio-lista-espera:
+    build: ./servicio-lista-espera
+    environment:
+      DB_URL: jdbc:postgresql://postgres-lista:5432/lista_db
+      DB_USER: postgres
+      DB_PASS: postgres
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres-lista:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  servicio-reasignacion:
+    build: ./servicio-reasignacion
+    environment:
+      DB_URL: jdbc:postgresql://postgres-reasignacion:5432/reasignacion_db
+      DB_USER: postgres
+      DB_PASS: postgres
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      SERVICIO_LISTA_ESPERA_URL: http://servicio-lista-espera:8082
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres-reasignacion:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      servicio-lista-espera:
+        condition: service_started
+
+  servicio-notificaciones:
+    build: ./servicio-notificaciones
+    environment:
+      DB_URL: jdbc:postgresql://postgres-notificaciones:5432/notificaciones_db
+      DB_USER: postgres
+      DB_PASS: postgres
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres-notificaciones:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./api-gateway
+    environment:
+      SERVICIO_PACIENTES_URL: http://servicio-pacientes:8081
+      SERVICIO_LISTA_ESPERA_URL: http://servicio-lista-espera:8082
+      SERVICIO_REASIGNACION_URL: http://servicio-reasignacion:8083
+      SERVICIO_NOTIFICACIONES_URL: http://servicio-notificaciones:8084
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      JWT_SECRET: cmVkbm9ydGUtand0LXNlY3JldC1rZXktMjAyNi1tdXktc2VndXJhLXktbGFyZ2E=
+    ports:
+      - "8080:8080"
+    depends_on:
+      servicio-pacientes:
+        condition: service_started
+      servicio-lista-espera:
+        condition: service_started
+      servicio-reasignacion:
+        condition: service_started
+      servicio-notificaciones:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+    ports:
+      - "5173:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+
+volumes:
+  pacientes_data:
+  lista_data:
+  reasignacion_data:
+  notificaciones_data:
