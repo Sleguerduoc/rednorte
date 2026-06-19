@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.reasignacion.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package cl.rednorte.reasignacion.exception;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
+
+<span class="fc" id="L14">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L16">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleResponseStatus(ResponseStatusException ex) {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">        String mensaje = ex.getReason() != null ? ex.getReason() : ex.getMessage();</span>
+<span class="fc" id="L21">        return ResponseEntity.status(ex.getStatusCode())</span>
+<span class="fc" id="L22">                .body(Map.of(&quot;message&quot;, mensaje));</span>
+    }
+
+    /** Dos peticiones simultáneas al mismo token: la segunda recibe 409. */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map&lt;String, String&gt; handleOptimisticLock(OptimisticLockingFailureException ex) {
+<span class="fc" id="L29">        log.warn(&quot;Conflicto de concurrencia al procesar oferta: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L30">        return Map.of(&quot;error&quot;, &quot;La oferta ya fue procesada por otra petición simultánea.&quot;);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map&lt;String, String&gt; handleGeneric(Exception ex) {
+<span class="fc" id="L36">        log.error(&quot;Error no controlado en reasignaciones&quot;, ex);</span>
+<span class="fc" id="L37">        return Map.of(&quot;error&quot;, ex.getClass().getSimpleName(), &quot;detalle&quot;, String.valueOf(ex.getMessage()));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

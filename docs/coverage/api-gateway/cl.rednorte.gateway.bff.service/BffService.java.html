@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BffService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.gateway.bff.service</a> &gt; <span class="el_source">BffService.java</span></div><h1>BffService.java</h1><pre class="source lang-java linenums">package cl.rednorte.gateway.bff.service;
+
+import cl.rednorte.gateway.bff.client.ListaEsperaClient;
+import cl.rednorte.gateway.bff.client.NotificacionesClient;
+import cl.rednorte.gateway.bff.client.PacientesClient;
+import cl.rednorte.gateway.bff.client.ReasignacionClient;
+import cl.rednorte.gateway.bff.dto.CitaCompletaResponse;
+import cl.rednorte.gateway.bff.dto.CitaDto;
+import cl.rednorte.gateway.bff.dto.DashboardResponse;
+import cl.rednorte.gateway.bff.dto.OfertaDto;
+import cl.rednorte.gateway.bff.dto.OfertaResponse;
+import cl.rednorte.gateway.bff.dto.PacienteDto;
+import cl.rednorte.gateway.bff.dto.SolicitudCompletaResponse;
+import cl.rednorte.gateway.bff.dto.SolicitudDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class BffService {
+
+    private static final String PACIENTE_DESCONOCIDO = &quot;Paciente &quot;;
+
+    private final PacientesClient      pacientesClient;
+    private final ListaEsperaClient    listaEsperaClient;
+    private final ReasignacionClient   reasignacionClient;
+    private final NotificacionesClient notificacionesClient;
+
+    // ── Endpoints existentes (sin cambios) ───────────────────────────────────
+
+    public Mono&lt;DashboardResponse&gt; getDashboard() {
+<span class="fc" id="L39">        Mono&lt;List&lt;PacienteDto&gt;&gt; pacientesMono =</span>
+<span class="fc" id="L40">                pacientesClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+<span class="fc" id="L41">        Mono&lt;List&lt;SolicitudDto&gt;&gt; solicitudesMono =</span>
+<span class="fc" id="L42">                listaEsperaClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+<span class="fc" id="L43">        Mono&lt;Long&gt; reasignacionesMono =</span>
+<span class="fc" id="L44">                reasignacionClient.listar().count().onErrorReturn(0L);</span>
+<span class="fc" id="L45">        Mono&lt;Long&gt; notificacionesMono =</span>
+<span class="fc" id="L46">                notificacionesClient.listar().count().onErrorReturn(0L);</span>
+
+<span class="fc" id="L48">        return Mono.zip(pacientesMono, solicitudesMono, reasignacionesMono, notificacionesMono)</span>
+<span class="fc" id="L49">                .map(tuple -&gt; {</span>
+<span class="fc" id="L50">                    List&lt;PacienteDto&gt;  pacientes   = tuple.getT1();</span>
+<span class="fc" id="L51">                    List&lt;SolicitudDto&gt; solicitudes = tuple.getT2();</span>
+<span class="fc" id="L52">                    long reasignaciones            = tuple.getT3();</span>
+<span class="fc" id="L53">                    long notificaciones            = tuple.getT4();</span>
+
+<span class="fc" id="L55">                    long pendientes = solicitudes.stream()</span>
+<span class="fc" id="L56">                            .filter(s -&gt; &quot;PENDIENTE&quot;.equalsIgnoreCase(s.getEstado())).count();</span>
+<span class="fc" id="L57">                    long canceladas = solicitudes.stream()</span>
+<span class="fc" id="L58">                            .filter(s -&gt; &quot;CANCELADA&quot;.equalsIgnoreCase(s.getEstado())).count();</span>
+
+<span class="fc" id="L60">                    return DashboardResponse.builder()</span>
+<span class="fc" id="L61">                            .totalPacientes(pacientes.size())</span>
+<span class="fc" id="L62">                            .totalSolicitudes(solicitudes.size())</span>
+<span class="fc" id="L63">                            .solicitudesPendientes(pendientes)</span>
+<span class="fc" id="L64">                            .solicitudesCanceladas(canceladas)</span>
+<span class="fc" id="L65">                            .totalReasignaciones(reasignaciones)</span>
+<span class="fc" id="L66">                            .totalNotificaciones(notificaciones)</span>
+<span class="fc" id="L67">                            .build();</span>
+                });
+    }
+
+    public Flux&lt;SolicitudCompletaResponse&gt; getListaCompletaConPacientes() {
+<span class="fc" id="L72">        Mono&lt;List&lt;PacienteDto&gt;&gt; pacientesMono =</span>
+<span class="fc" id="L73">                pacientesClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+<span class="fc" id="L74">        Mono&lt;List&lt;SolicitudDto&gt;&gt; solicitudesMono =</span>
+<span class="fc" id="L75">                listaEsperaClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+
+<span class="fc" id="L77">        return Mono.zip(pacientesMono, solicitudesMono)</span>
+<span class="fc" id="L78">                .flatMapMany(tuple -&gt; {</span>
+<span class="fc" id="L79">                    Map&lt;Long, PacienteDto&gt; mapa = toMap(tuple.getT1());</span>
+<span class="fc" id="L80">                    return Flux.fromIterable(tuple.getT2()).map(s -&gt; enriquecerSolicitud(s, mapa));</span>
+                });
+    }
+
+    // ── Nuevos endpoints (Fase 8A) ───────────────────────────────────────────
+
+    /** Citas de un día con nombre de paciente, para la &quot;Sala del día&quot;. */
+    public Flux&lt;CitaCompletaResponse&gt; getSalaDelDia(String fecha) {
+<span class="fc" id="L88">        Mono&lt;List&lt;PacienteDto&gt;&gt; pacientesMono =</span>
+<span class="fc" id="L89">                pacientesClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+<span class="fc" id="L90">        Mono&lt;List&lt;CitaDto&gt;&gt; citasMono =</span>
+<span class="fc" id="L91">                listaEsperaClient.listarCitasDelDia(fecha).collectList().onErrorReturn(Collections.emptyList());</span>
+
+<span class="fc" id="L93">        return Mono.zip(pacientesMono, citasMono)</span>
+<span class="fc" id="L94">                .flatMapMany(tuple -&gt; {</span>
+<span class="fc" id="L95">                    Map&lt;Long, PacienteDto&gt; mapa = toMap(tuple.getT1());</span>
+<span class="fc" id="L96">                    return Flux.fromIterable(tuple.getT2()).map(c -&gt; enriquecerCita(c, mapa));</span>
+                });
+    }
+
+    /** Solicitudes en estado PENDIENTE enriquecidas con nombre de paciente. */
+    public Flux&lt;SolicitudCompletaResponse&gt; getListaEsperaPendiente() {
+<span class="fc" id="L102">        return getListaCompletaConPacientes()</span>
+<span class="fc" id="L103">                .filter(s -&gt; &quot;PENDIENTE&quot;.equalsIgnoreCase(s.getEstado()));</span>
+    }
+
+    /** Todas las ofertas con nombre de paciente, para el panel de admin. */
+    public Flux&lt;OfertaResponse&gt; getOfertas() {
+<span class="fc" id="L108">        Mono&lt;List&lt;PacienteDto&gt;&gt; pacientesMono =</span>
+<span class="fc" id="L109">                pacientesClient.listar().collectList().onErrorReturn(Collections.emptyList());</span>
+<span class="fc" id="L110">        Mono&lt;List&lt;OfertaDto&gt;&gt; ofertasMono =</span>
+<span class="fc" id="L111">                reasignacionClient.listarOfertas().collectList().onErrorReturn(Collections.emptyList());</span>
+
+<span class="fc" id="L113">        return Mono.zip(pacientesMono, ofertasMono)</span>
+<span class="fc" id="L114">                .flatMapMany(tuple -&gt; {</span>
+<span class="fc" id="L115">                    Map&lt;Long, PacienteDto&gt; mapa = toMap(tuple.getT1());</span>
+<span class="fc" id="L116">                    return Flux.fromIterable(tuple.getT2()).map(o -&gt; enriquecerOferta(o, mapa));</span>
+                });
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private Map&lt;Long, PacienteDto&gt; toMap(List&lt;PacienteDto&gt; lista) {
+<span class="fc" id="L123">        return lista.stream().collect(Collectors.toMap(PacienteDto::getId, p -&gt; p));</span>
+    }
+
+    private SolicitudCompletaResponse enriquecerSolicitud(SolicitudDto s, Map&lt;Long, PacienteDto&gt; mapa) {
+<span class="fc" id="L127">        PacienteDto paciente = mapa.get(s.getPacienteId());</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        String nombre = paciente != null ? buildNombre(paciente) : PACIENTE_DESCONOCIDO +s.getPacienteId();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        String rut    = paciente != null ? paciente.getRut() : null;</span>
+<span class="fc" id="L130">        return SolicitudCompletaResponse.builder()</span>
+<span class="fc" id="L131">                .id(s.getId())</span>
+<span class="fc" id="L132">                .pacienteId(s.getPacienteId())</span>
+<span class="fc" id="L133">                .pacienteRut(rut)</span>
+<span class="fc" id="L134">                .pacienteNombre(nombre)</span>
+<span class="fc" id="L135">                .especialidad(s.getEspecialidad())</span>
+<span class="fc" id="L136">                .estado(s.getEstado())</span>
+<span class="fc" id="L137">                .prioridad(s.getPrioridad())</span>
+<span class="fc" id="L138">                .fechaRegistro(s.getFechaRegistro())</span>
+<span class="fc" id="L139">                .build();</span>
+    }
+
+    private CitaCompletaResponse enriquecerCita(CitaDto c, Map&lt;Long, PacienteDto&gt; mapa) {
+<span class="fc" id="L143">        PacienteDto paciente = mapa.get(c.getPacienteId());</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        String nombre = paciente != null ? buildNombre(paciente) : PACIENTE_DESCONOCIDO +c.getPacienteId();</span>
+<span class="fc" id="L145">        return CitaCompletaResponse.builder()</span>
+<span class="fc" id="L146">                .id(c.getId())</span>
+<span class="fc" id="L147">                .pacienteId(c.getPacienteId())</span>
+<span class="fc" id="L148">                .pacienteNombre(nombre)</span>
+<span class="fc" id="L149">                .especialidad(c.getEspecialidad())</span>
+<span class="fc" id="L150">                .fecha(c.getFecha())</span>
+<span class="fc" id="L151">                .hora(c.getHora())</span>
+<span class="fc" id="L152">                .estado(c.getEstado())</span>
+<span class="fc" id="L153">                .horaCheckIn(c.getHoraCheckIn())</span>
+<span class="fc" id="L154">                .build();</span>
+    }
+
+    private OfertaResponse enriquecerOferta(OfertaDto o, Map&lt;Long, PacienteDto&gt; mapa) {
+<span class="fc" id="L158">        PacienteDto paciente = mapa.get(o.getPacienteId());</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        String nombre = paciente != null ? buildNombre(paciente) : PACIENTE_DESCONOCIDO +o.getPacienteId();</span>
+<span class="fc" id="L160">        return OfertaResponse.builder()</span>
+<span class="fc" id="L161">                .id(o.getId())</span>
+<span class="fc" id="L162">                .token(o.getToken())</span>
+<span class="fc" id="L163">                .pacienteId(o.getPacienteId())</span>
+<span class="fc" id="L164">                .pacienteNombre(nombre)</span>
+<span class="fc" id="L165">                .especialidad(o.getEspecialidad())</span>
+<span class="fc" id="L166">                .fechaCupo(o.getFechaCupo())</span>
+<span class="fc" id="L167">                .horaCupo(o.getHoraCupo())</span>
+<span class="fc" id="L168">                .estado(o.getEstado())</span>
+<span class="fc" id="L169">                .origen(o.getOrigen())</span>
+<span class="fc" id="L170">                .creadaEn(o.getCreadaEn())</span>
+<span class="fc" id="L171">                .expiraEn(o.getExpiraEn())</span>
+<span class="fc" id="L172">                .prioridadMinima(o.getPrioridadMinima())</span>
+<span class="fc" id="L173">                .build();</span>
+    }
+
+    private String buildNombre(PacienteDto p) {
+<span class="fc" id="L177">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (p.getNombres()         != null) sb.append(p.getNombres()).append(&quot; &quot;);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        if (p.getApellidoPaterno() != null) sb.append(p.getApellidoPaterno()).append(&quot; &quot;);</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (p.getApellidoMaterno() != null) sb.append(p.getApellidoMaterno());</span>
+<span class="fc" id="L181">        String result = sb.toString().trim();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        return result.isBlank() ? &quot;Sin nombre&quot; : result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
