@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OfertaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.reasignacion.service</a> &gt; <span class="el_source">OfertaService.java</span></div><h1>OfertaService.java</h1><pre class="source lang-java linenums">package cl.rednorte.reasignacion.service;
+
+import cl.rednorte.reasignacion.config.RabbitConfig;
+import cl.rednorte.reasignacion.dto.AsignarCitaRequest;
+import cl.rednorte.reasignacion.dto.CandidatoMatchingDto;
+import cl.rednorte.reasignacion.event.CupoLiberadoEvent;
+import cl.rednorte.reasignacion.event.NotificacionSolicitadaEvent;
+import cl.rednorte.reasignacion.model.EstadoOferta;
+import cl.rednorte.reasignacion.model.Oferta;
+import cl.rednorte.reasignacion.model.OrigenCupo;
+import cl.rednorte.reasignacion.repository.OfertaRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
+
+<span class="fc" id="L31">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class OfertaService {
+
+    private final OfertaRepository ofertaRepository;
+    private final RabbitTemplate rabbitTemplate;
+    private final RestTemplate restTemplate;
+
+    @Value(&quot;${services.lista-espera.url}&quot;)
+    private String listaEsperaUrl;
+
+    // ── Procesamiento inicial del cupo liberado (desde 5A) ───────────────────
+
+    @Transactional
+    public void procesarCupoLiberado(CupoLiberadoEvent evento) {
+<span class="fc" id="L47">        List&lt;CandidatoMatchingDto&gt; candidatos = obtenerCandidatos(evento);</span>
+
+<span class="pc bpc" id="L49" title="1 of 4 branches missed.">        if (candidatos == null || candidatos.isEmpty()) {</span>
+<span class="fc" id="L50">            log.info(&quot;Sin candidatos para cupo {} {} {} esp={}&quot;,</span>
+<span class="fc" id="L51">                    evento.getOrigen(), evento.getFechaCupo(), evento.getHoraCupo(), evento.getEspecialidad());</span>
+<span class="fc" id="L52">            return;</span>
+        }
+
+<span class="fc" id="L55">        CandidatoMatchingDto candidato = candidatos.get(0);</span>
+
+<span class="fc" id="L57">        OrigenCupo origen = OrigenCupo.valueOf(evento.getOrigen());</span>
+<span class="fc" id="L58">        LocalDateTime ahora = LocalDateTime.now();</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        LocalDateTime expiraEn = origen == OrigenCupo.NO_SHOW_ADELANTO</span>
+<span class="fc" id="L60">                ? ahora.plusMinutes(45)</span>
+<span class="fc" id="L61">                : ahora.plusHours(24);</span>
+
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        Long solicitudId = &quot;LISTA_ESPERA&quot;.equals(candidato.getOrigen()) ? candidato.getSolicitudId() : null;</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        Long citaId      = &quot;CITA_FUTURA&quot;.equals(candidato.getOrigen())  ? candidato.getCitaId()      : null;</span>
+
+<span class="fc" id="L66">        UUID token = UUID.randomUUID();</span>
+
+<span class="fc" id="L68">        Oferta oferta = Oferta.builder()</span>
+<span class="fc" id="L69">                .token(token)</span>
+<span class="fc" id="L70">                .pacienteId(candidato.getPacienteId())</span>
+<span class="fc" id="L71">                .solicitudId(solicitudId)</span>
+<span class="fc" id="L72">                .citaId(citaId)</span>
+<span class="fc" id="L73">                .especialidad(evento.getEspecialidad())</span>
+<span class="fc" id="L74">                .fechaCupo(LocalDate.parse(evento.getFechaCupo()))</span>
+<span class="fc" id="L75">                .horaCupo(LocalTime.parse(evento.getHoraCupo()))</span>
+<span class="fc" id="L76">                .estado(EstadoOferta.OFRECIDA)</span>
+<span class="fc" id="L77">                .origen(origen)</span>
+<span class="fc" id="L78">                .prioridadMinima(evento.getPrioridadMinima())</span>
+<span class="fc" id="L79">                .creadaEn(ahora)</span>
+<span class="fc" id="L80">                .expiraEn(expiraEn)</span>
+<span class="fc" id="L81">                .build();</span>
+
+<span class="fc" id="L83">        ofertaRepository.save(oferta);</span>
+<span class="fc" id="L84">        log.info(&quot;Oferta {} creada para paciente {} (expira {})&quot;, token, candidato.getPacienteId(), expiraEn);</span>
+
+<span class="fc" id="L86">        String mensaje = String.format(</span>
+<span class="fc" id="L87">                &quot;RedNorte: Se ha liberado un cupo de %s para el %s a las %s.&quot;,</span>
+<span class="fc" id="L88">                evento.getEspecialidad(), evento.getFechaCupo(), evento.getHoraCupo());</span>
+
+<span class="fc" id="L90">        publicarNotificacion(candidato.getPacienteId(), mensaje, token.toString());</span>
+<span class="fc" id="L91">    }</span>
+
+    // ── Confirmar oferta (público, un solo uso) ──────────────────────────────
+
+    @Transactional
+    public void confirmar(UUID token) {
+<span class="fc" id="L97">        Oferta oferta = ofertaRepository.findByToken(token)</span>
+<span class="fc" id="L98">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Token inválido&quot;));</span>
+
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (oferta.getEstado() != EstadoOferta.OFRECIDA) {</span>
+<span class="fc" id="L101">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="fc" id="L102">                    &quot;Esta oferta ya fue &quot; + oferta.getEstado());</span>
+        }
+
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (LocalDateTime.now().isAfter(oferta.getExpiraEn())) {</span>
+<span class="fc" id="L106">            throw new ResponseStatusException(HttpStatus.GONE,</span>
+<span class="fc" id="L107">                    &quot;Esta oferta venció el &quot; + oferta.getExpiraEn());</span>
+        }
+
+<span class="fc" id="L110">        oferta.setEstado(EstadoOferta.CONFIRMADA);</span>
+<span class="fc" id="L111">        ofertaRepository.saveAndFlush(oferta); // flush para que el @Version falle aquí si hay concurrencia</span>
+
+<span class="fc" id="L113">        AsignarCitaRequest asignarReq = AsignarCitaRequest.builder()</span>
+<span class="fc" id="L114">                .pacienteId(oferta.getPacienteId())</span>
+<span class="fc" id="L115">                .especialidad(oferta.getEspecialidad())</span>
+<span class="fc" id="L116">                .fecha(oferta.getFechaCupo().toString())</span>
+<span class="fc" id="L117">                .hora(oferta.getHoraCupo().toString())</span>
+<span class="fc" id="L118">                .solicitudId(oferta.getSolicitudId())</span>
+<span class="fc" id="L119">                .citaIdAReasignar(oferta.getCitaId())</span>
+<span class="fc" id="L120">                .build();</span>
+
+        try {
+<span class="fc" id="L123">            restTemplate.postForObject(listaEsperaUrl + &quot;/citas/asignar&quot;, asignarReq, String.class);</span>
+<span class="pc" id="L124">        } catch (Exception e) {</span>
+<span class="nc" id="L125">            log.error(&quot;Error asignando cupo para oferta {}: {}&quot;, token, e.getMessage());</span>
+<span class="nc" id="L126">            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,</span>
+<span class="nc" id="L127">                    &quot;No se pudo asignar el cupo. Inténtelo de nuevo.&quot;);</span>
+        }
+
+<span class="fc" id="L130">        log.info(&quot;Oferta {} confirmada y cupo asignado a paciente {}&quot;, token, oferta.getPacienteId());</span>
+<span class="fc" id="L131">    }</span>
+
+    // ── Rechazar oferta (público, un solo uso) ───────────────────────────────
+
+    @Transactional
+    public void rechazar(UUID token) {
+<span class="fc" id="L137">        Oferta oferta = ofertaRepository.findByToken(token)</span>
+<span class="pc" id="L138">                .orElseThrow(() -&gt; new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;Token inválido&quot;));</span>
+
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">        if (oferta.getEstado() != EstadoOferta.OFRECIDA) {</span>
+<span class="nc" id="L141">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="nc" id="L142">                    &quot;Esta oferta ya fue &quot; + oferta.getEstado());</span>
+        }
+
+<span class="fc" id="L145">        oferta.setEstado(EstadoOferta.RECHAZADA);</span>
+<span class="fc" id="L146">        ofertaRepository.save(oferta);</span>
+
+<span class="fc" id="L148">        republicarCupo(oferta, List.of(oferta.getPacienteId()));</span>
+<span class="fc" id="L149">        log.info(&quot;Oferta {} rechazada. Cupo re-publicado para el siguiente candidato.&quot;, token);</span>
+<span class="fc" id="L150">    }</span>
+
+    // ── Revisar vencidas (admin) ─────────────────────────────────────────────
+
+    @Transactional
+    public int revisarVencidas() {
+<span class="fc" id="L156">        List&lt;Oferta&gt; vencidas = ofertaRepository</span>
+<span class="fc" id="L157">                .findByEstadoAndExpiraEnBefore(EstadoOferta.OFRECIDA, LocalDateTime.now());</span>
+
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        for (Oferta oferta : vencidas) {</span>
+<span class="fc" id="L160">            oferta.setEstado(EstadoOferta.EXPIRADA);</span>
+<span class="fc" id="L161">            ofertaRepository.save(oferta);</span>
+<span class="fc" id="L162">            republicarCupo(oferta, List.of(oferta.getPacienteId()));</span>
+        }
+
+<span class="fc" id="L165">        log.info(&quot;Revisión de vencidas: {} ofertas expiradas y re-publicadas.&quot;, vencidas.size());</span>
+<span class="fc" id="L166">        return vencidas.size();</span>
+    }
+
+    // ── Consultas ────────────────────────────────────────────────────────────
+
+    public List&lt;Oferta&gt; listarTodas() {
+<span class="nc" id="L172">        return ofertaRepository.findAll();</span>
+    }
+
+    // ── Helpers privados ─────────────────────────────────────────────────────
+
+    private void republicarCupo(Oferta oferta, List&lt;Long&gt; excluidos) {
+<span class="fc" id="L178">        CupoLiberadoEvent evento = CupoLiberadoEvent.builder()</span>
+<span class="fc" id="L179">                .especialidad(oferta.getEspecialidad())</span>
+<span class="fc" id="L180">                .fechaCupo(oferta.getFechaCupo().toString())</span>
+<span class="fc" id="L181">                .horaCupo(oferta.getHoraCupo().toString())</span>
+<span class="fc" id="L182">                .prioridadMinima(oferta.getPrioridadMinima())</span>
+<span class="fc" id="L183">                .origen(oferta.getOrigen().name())</span>
+<span class="fc" id="L184">                .pacientesExcluidos(excluidos)</span>
+<span class="fc" id="L185">                .build();</span>
+
+<span class="fc" id="L187">        rabbitTemplate.convertAndSend(RabbitConfig.COLA_CUPO_LIBERADO, evento);</span>
+<span class="fc" id="L188">    }</span>
+
+    private void publicarNotificacion(Long pacienteId, String mensaje, String token) {
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        for (String canal : List.of(&quot;EMAIL&quot;, &quot;SMS&quot;)) {</span>
+<span class="fc" id="L192">            rabbitTemplate.convertAndSend(RabbitConfig.COLA_NOTIFICACION_SOLICITADA,</span>
+<span class="fc" id="L193">                    NotificacionSolicitadaEvent.builder()</span>
+<span class="fc" id="L194">                            .pacienteId(pacienteId)</span>
+<span class="fc" id="L195">                            .canal(canal)</span>
+<span class="fc" id="L196">                            .mensaje(mensaje)</span>
+<span class="fc" id="L197">                            .token(token)</span>
+<span class="fc" id="L198">                            .build());</span>
+        }
+<span class="fc" id="L200">    }</span>
+
+    private List&lt;CandidatoMatchingDto&gt; obtenerCandidatos(CupoLiberadoEvent evento) {
+<span class="fc" id="L203">        UriComponentsBuilder uri = UriComponentsBuilder</span>
+<span class="fc" id="L204">                .fromUriString(listaEsperaUrl + &quot;/matching/candidatos&quot;)</span>
+<span class="fc" id="L205">                .queryParam(&quot;especialidad&quot;, evento.getEspecialidad())</span>
+<span class="fc" id="L206">                .queryParam(&quot;fechaCupo&quot;, evento.getFechaCupo());</span>
+
+<span class="pc bpc" id="L208" title="1 of 4 branches missed.">        if (evento.getPrioridadMinima() != null &amp;&amp; !evento.getPrioridadMinima().isBlank()) {</span>
+<span class="fc" id="L209">            uri.queryParam(&quot;prioridadMinima&quot;, evento.getPrioridadMinima());</span>
+        }
+
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (evento.getPacientesExcluidos() != null) {</span>
+<span class="pc" id="L213">            evento.getPacientesExcluidos().forEach(id -&gt; uri.queryParam(&quot;excluir&quot;, id));</span>
+        }
+
+<span class="fc" id="L216">        return restTemplate.exchange(</span>
+<span class="fc" id="L217">                uri.toUriString(),</span>
+<span class="fc" id="L218">                HttpMethod.GET,</span>
+<span class="fc" id="L219">                null,</span>
+<span class="fc" id="L220">                new ParameterizedTypeReference&lt;List&lt;CandidatoMatchingDto&gt;&gt;() {}</span>
+<span class="fc" id="L221">        ).getBody();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

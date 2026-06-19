@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolicitudService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.listaespera.service</a> &gt; <span class="el_source">SolicitudService.java</span></div><h1>SolicitudService.java</h1><pre class="source lang-java linenums">package cl.rednorte.listaespera.service;
+
+import cl.rednorte.listaespera.config.RabbitConfig;
+import cl.rednorte.listaespera.event.CitaCanceladaEvent;
+import cl.rednorte.listaespera.event.CupoLiberadoEvent;
+import cl.rednorte.listaespera.model.Cita;
+import cl.rednorte.listaespera.model.EstadoCita;
+import cl.rednorte.listaespera.model.EstadoSolicitud;
+import cl.rednorte.listaespera.model.PrioridadSolicitud;
+import cl.rednorte.listaespera.model.SolicitudListaEspera;
+import cl.rednorte.listaespera.repository.CitaRepository;
+import cl.rednorte.listaespera.repository.SolicitudRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class SolicitudService {
+
+    private final SolicitudRepository repository;
+    private final CitaRepository citaRepository;
+    private final RabbitTemplate rabbitTemplate;
+
+    public SolicitudListaEspera crear(SolicitudListaEspera solicitud) {
+<span class="nc" id="L33">        solicitud.setEstado(EstadoSolicitud.PENDIENTE);</span>
+<span class="nc" id="L34">        solicitud.setFechaRegistro(LocalDateTime.now());</span>
+
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if (solicitud.getPrioridad() == null) {</span>
+<span class="nc" id="L37">            solicitud.setPrioridad(PrioridadSolicitud.NORMAL);</span>
+        }
+
+<span class="nc" id="L40">        return repository.save(solicitud);</span>
+    }
+
+    public List&lt;SolicitudListaEspera&gt; listar() {
+<span class="nc" id="L44">        return repository.findAll();</span>
+    }
+
+    /**
+     * Cancela la cita identificada por citaId.
+     * Firma pública sin cambios para no romper al frontend.
+     * Los parámetros pacienteId, especialidad y fecha del caller son ignorados:
+     * los datos reales se toman de la entidad Cita persistida.
+     */
+    @Transactional
+    public void cancelarCita(Long citaId, Long pacienteId, String especialidad, String fecha) {
+        // Bug 1 fix: buscar primero; si no existe, lanzar 404 y no publicar nada
+<span class="fc" id="L56">        Cita cita = citaRepository.findById(citaId)</span>
+<span class="fc" id="L57">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="fc" id="L58">                        HttpStatus.NOT_FOUND, &quot;Cita no encontrada: &quot; + citaId));</span>
+
+        // Marcar la cita como CANCELADA
+<span class="fc" id="L61">        cita.setEstado(EstadoCita.CANCELADA);</span>
+<span class="fc" id="L62">        citaRepository.save(cita);</span>
+
+        // Volver la solicitud a PENDIENTE para que el paciente vuelva a la cola
+<span class="fc" id="L65">        repository.findById(cita.getSolicitudId()).ifPresent(solicitud -&gt; {</span>
+<span class="fc" id="L66">            solicitud.setEstado(EstadoSolicitud.PENDIENTE);</span>
+<span class="fc" id="L67">            repository.save(solicitud);</span>
+<span class="fc" id="L68">        });</span>
+
+        // Bug 2 fix: fecha y especialidad salen de la entidad, no del caller
+        // Evento legado — mantiene compatibilidad con CitaCanceladaListener existente
+<span class="fc" id="L72">        rabbitTemplate.convertAndSend(RabbitConfig.COLA_CITA_CANCELADA,</span>
+<span class="fc" id="L73">                CitaCanceladaEvent.builder()</span>
+<span class="fc" id="L74">                        .citaId(cita.getId())</span>
+<span class="fc" id="L75">                        .pacienteId(cita.getPacienteId())</span>
+<span class="fc" id="L76">                        .especialidad(cita.getEspecialidad())</span>
+<span class="fc" id="L77">                        .fecha(cita.getFecha().toString())</span>
+<span class="fc" id="L78">                        .build());</span>
+
+        // Flujo 2: liberar cupo solo si la cita era a futuro
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (cita.getFecha().isAfter(LocalDate.now())) {</span>
+<span class="fc" id="L82">            rabbitTemplate.convertAndSend(RabbitConfig.COLA_CUPO_LIBERADO,</span>
+<span class="fc" id="L83">                    CupoLiberadoEvent.builder()</span>
+<span class="fc" id="L84">                            .especialidad(cita.getEspecialidad())</span>
+<span class="fc" id="L85">                            .fechaCupo(cita.getFecha().toString())</span>
+<span class="fc" id="L86">                            .horaCupo(cita.getHora().toString())</span>
+<span class="fc" id="L87">                            .origen(&quot;CANCELACION_FUTURA&quot;)</span>
+<span class="fc" id="L88">                            .pacientesExcluidos(List.of())</span>
+<span class="fc" id="L89">                            .build());</span>
+        }
+<span class="fc" id="L91">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

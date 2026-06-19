@@ -1,0 +1,7 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+,cl.rednorte.notificaciones.service,NotificacionService,0,45,0,4,0,14,0,3,0,1
+,cl.rednorte.notificaciones.listener,NotificacionListener,0,5,0,0,0,2,0,1,0,1
+,cl.rednorte.notificaciones.factory,EmailNotificacion,0,8,0,0,0,3,0,2,0,2
+,cl.rednorte.notificaciones.factory,SmsNotificacion,0,8,0,0,0,3,0,2,0,2
+,cl.rednorte.notificaciones.factory,NotificacionFactory,3,12,0,2,1,3,1,2,1,1
+,cl.rednorte.notificaciones.controller,NotificacionController,0,4,0,0,0,1,0,1,0,1

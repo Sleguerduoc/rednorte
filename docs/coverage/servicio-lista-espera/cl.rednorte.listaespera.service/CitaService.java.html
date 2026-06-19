@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CitaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.listaespera.service</a> &gt; <span class="el_source">CitaService.java</span></div><h1>CitaService.java</h1><pre class="source lang-java linenums">package cl.rednorte.listaespera.service;
+
+import cl.rednorte.listaespera.config.RabbitConfig;
+import cl.rednorte.listaespera.dto.AgendarCitaRequest;
+import cl.rednorte.listaespera.dto.AsignarCitaRequest;
+import cl.rednorte.listaespera.event.CupoLiberadoEvent;
+import cl.rednorte.listaespera.model.Cita;
+import cl.rednorte.listaespera.model.EstadoCita;
+import cl.rednorte.listaespera.model.EstadoSolicitud;
+import cl.rednorte.listaespera.model.SolicitudListaEspera;
+import cl.rednorte.listaespera.repository.CitaRepository;
+import cl.rednorte.listaespera.repository.SolicitudRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+<span class="fc" id="L26">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class CitaService {
+
+<span class="fc" id="L31">    private static final String CITA_NO_ENCONTRADA = &quot;Cita no encontrada: &quot;;</span>
+
+    private final CitaRepository citaRepository;
+    private final SolicitudRepository solicitudRepository;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Transactional
+    public Cita agendar(AgendarCitaRequest request) {
+<span class="fc" id="L39">        SolicitudListaEspera solicitud = solicitudRepository.findById(request.getSolicitudId())</span>
+<span class="pc" id="L40">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="nc" id="L41">                        HttpStatus.NOT_FOUND,</span>
+<span class="nc" id="L42">                        &quot;Solicitud no encontrada: &quot; + request.getSolicitudId()));</span>
+
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {</span>
+<span class="nc" id="L45">            throw new ResponseStatusException(</span>
+<span class="nc" id="L46">                    HttpStatus.CONFLICT,</span>
+<span class="nc" id="L47">                    &quot;Solo se pueden agendar solicitudes en estado PENDIENTE. Estado actual: &quot; + solicitud.getEstado());</span>
+        }
+
+<span class="fc" id="L50">        boolean cupoOcupado = citaRepository.existsByEspecialidadAndFechaAndHoraAndEstadoIn(</span>
+<span class="fc" id="L51">                solicitud.getEspecialidad(),</span>
+<span class="fc" id="L52">                request.getFecha(),</span>
+<span class="fc" id="L53">                request.getHora(),</span>
+<span class="fc" id="L54">                List.of(EstadoCita.PROGRAMADA, EstadoCita.EN_SALA));</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (cupoOcupado) {</span>
+<span class="fc" id="L56">            throw new ResponseStatusException(HttpStatus.CONFLICT,</span>
+<span class="fc" id="L57">                    &quot;El cupo de &quot; + solicitud.getEspecialidad()</span>
+<span class="fc" id="L58">                    + &quot; el &quot; + request.getFecha()</span>
+<span class="fc" id="L59">                    + &quot; a las &quot; + request.getHora()</span>
+                    + &quot; ya está ocupado. Por favor elige otra hora.&quot;);
+        }
+
+<span class="fc" id="L63">        Cita cita = Cita.builder()</span>
+<span class="fc" id="L64">                .solicitudId(solicitud.getId())</span>
+<span class="fc" id="L65">                .pacienteId(solicitud.getPacienteId())</span>
+<span class="fc" id="L66">                .especialidad(solicitud.getEspecialidad())</span>
+<span class="fc" id="L67">                .fecha(request.getFecha())</span>
+<span class="fc" id="L68">                .hora(request.getHora())</span>
+<span class="fc" id="L69">                .estado(EstadoCita.PROGRAMADA)</span>
+<span class="fc" id="L70">                .build();</span>
+
+<span class="fc" id="L72">        solicitud.setEstado(EstadoSolicitud.AGENDADA);</span>
+<span class="fc" id="L73">        solicitudRepository.save(solicitud);</span>
+
+<span class="fc" id="L75">        return citaRepository.save(cita);</span>
+    }
+
+    public List&lt;Cita&gt; listarPorFechaYEspecialidad(LocalDate fecha, String especialidad) {
+<span class="nc" id="L79">        return citaRepository.findByFechaAndEspecialidadOrderByHoraAsc(fecha, especialidad);</span>
+    }
+
+    public List&lt;Cita&gt; listarPorFecha(LocalDate fecha) {
+<span class="fc" id="L83">        return citaRepository.findByFechaOrderByEspecialidadAscHoraAsc(fecha);</span>
+    }
+
+    @Transactional
+    public Cita checkIn(Long id) {
+<span class="fc" id="L88">        Cita cita = citaRepository.findById(id)</span>
+<span class="pc" id="L89">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="nc" id="L90">                        HttpStatus.NOT_FOUND, CITA_NO_ENCONTRADA + id));</span>
+
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (cita.getEstado() != EstadoCita.PROGRAMADA) {</span>
+<span class="fc" id="L93">            throw new ResponseStatusException(</span>
+<span class="fc" id="L94">                    HttpStatus.CONFLICT,</span>
+<span class="fc" id="L95">                    &quot;Check-in solo permitido en estado PROGRAMADA. Estado actual: &quot; + cita.getEstado());</span>
+        }
+
+<span class="fc" id="L98">        cita.setEstado(EstadoCita.EN_SALA);</span>
+<span class="fc" id="L99">        cita.setHoraCheckIn(LocalDateTime.now());</span>
+<span class="fc" id="L100">        return citaRepository.save(cita);</span>
+    }
+
+    @Transactional
+    public Cita deshacerCheckIn(Long id) {
+<span class="fc" id="L105">        Cita cita = citaRepository.findById(id)</span>
+<span class="pc" id="L106">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="nc" id="L107">                        HttpStatus.NOT_FOUND, CITA_NO_ENCONTRADA + id));</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (cita.getEstado() != EstadoCita.EN_SALA) {</span>
+<span class="fc" id="L110">            throw new ResponseStatusException(</span>
+<span class="fc" id="L111">                    HttpStatus.CONFLICT,</span>
+<span class="fc" id="L112">                    &quot;Deshacer check-in solo permitido en estado EN_SALA. Estado actual: &quot; + cita.getEstado());</span>
+        }
+
+<span class="fc" id="L115">        cita.setEstado(EstadoCita.PROGRAMADA);</span>
+<span class="fc" id="L116">        cita.setHoraCheckIn(null);</span>
+<span class="fc" id="L117">        return citaRepository.save(cita);</span>
+    }
+
+    @Transactional
+    public Cita asignar(AsignarCitaRequest request) {
+<span class="fc" id="L122">        Long solicitudIdFinal = request.getSolicitudId();</span>
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (request.getCitaIdAReasignar() != null) {</span>
+<span class="fc" id="L125">            Cita citaVieja = citaRepository.findById(request.getCitaIdAReasignar())</span>
+<span class="fc" id="L126">                    .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="fc" id="L127">                            HttpStatus.NOT_FOUND,</span>
+<span class="fc" id="L128">                            &quot;Cita a reasignar no encontrada: &quot; + request.getCitaIdAReasignar()));</span>
+
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (citaVieja.getEstado() != EstadoCita.PROGRAMADA) {</span>
+<span class="fc" id="L131">                throw new ResponseStatusException(</span>
+<span class="fc" id="L132">                        HttpStatus.CONFLICT,</span>
+<span class="fc" id="L133">                        &quot;Solo se puede reasignar una cita PROGRAMADA. Estado actual: &quot; + citaVieja.getEstado());</span>
+            }
+
+<span class="fc" id="L136">            solicitudIdFinal = citaVieja.getSolicitudId();</span>
+<span class="fc" id="L137">            citaVieja.setEstado(EstadoCita.REASIGNADA);</span>
+<span class="fc" id="L138">            citaRepository.save(citaVieja);</span>
+        }
+
+<span class="fc" id="L141">        Cita nuevaCita = Cita.builder()</span>
+<span class="fc" id="L142">                .solicitudId(solicitudIdFinal)</span>
+<span class="fc" id="L143">                .pacienteId(request.getPacienteId())</span>
+<span class="fc" id="L144">                .especialidad(request.getEspecialidad())</span>
+<span class="fc" id="L145">                .fecha(LocalDate.parse(request.getFecha()))</span>
+<span class="fc" id="L146">                .hora(LocalTime.parse(request.getHora()))</span>
+<span class="fc" id="L147">                .estado(EstadoCita.PROGRAMADA)</span>
+<span class="fc" id="L148">                .build();</span>
+
+<span class="fc" id="L150">        return citaRepository.save(nuevaCita);</span>
+    }
+
+    /**
+     * Marca la cita como NO_SHOW y ejecuta el algoritmo de adelanto en cascada.
+     * Solo válido para citas de HOY en estado PROGRAMADA o EN_SALA.
+     * Tras la cascada, publica CupoLiberadoEvent con la última hora liberada.
+     */
+    @Transactional
+    public Cita marcarNoShow(Long citaId) {
+<span class="fc" id="L160">        LocalDate hoy = LocalDate.now();</span>
+
+<span class="fc" id="L162">        Cita cita = citaRepository.findById(citaId)</span>
+<span class="pc" id="L163">                .orElseThrow(() -&gt; new ResponseStatusException(</span>
+<span class="nc" id="L164">                        HttpStatus.NOT_FOUND, CITA_NO_ENCONTRADA + citaId));</span>
+
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        if (!cita.getFecha().equals(hoy)) {</span>
+<span class="nc" id="L167">            throw new ResponseStatusException(</span>
+<span class="nc" id="L168">                    HttpStatus.CONFLICT,</span>
+<span class="nc" id="L169">                    &quot;No-show solo válido para citas de hoy. Fecha de la cita: &quot; + cita.getFecha());</span>
+        }
+
+<span class="pc bpc" id="L172" title="1 of 4 branches missed.">        if (cita.getEstado() != EstadoCita.PROGRAMADA &amp;&amp; cita.getEstado() != EstadoCita.EN_SALA) {</span>
+<span class="nc" id="L173">            throw new ResponseStatusException(</span>
+<span class="nc" id="L174">                    HttpStatus.CONFLICT,</span>
+<span class="nc" id="L175">                    &quot;No-show solo válido en estado PROGRAMADA o EN_SALA. Estado actual: &quot; + cita.getEstado());</span>
+        }
+
+<span class="fc" id="L178">        cita.setEstado(EstadoCita.NO_SHOW);</span>
+<span class="fc" id="L179">        citaRepository.save(cita);</span>
+
+        // --- Algoritmo de adelanto en cascada ---
+        // Solo los EN_SALA (presentes con check-in) posteriores al no-show se mueven.
+        // Los PROGRAMADA sin check-in conservan su hora.
+<span class="fc" id="L184">        List&lt;Cita&gt; presentes = citaRepository</span>
+<span class="fc" id="L185">                .findByFechaAndEspecialidadAndEstadoAndHoraAfterOrderByHoraAsc(</span>
+<span class="fc" id="L186">                        hoy, cita.getEspecialidad(), EstadoCita.EN_SALA, cita.getHora());</span>
+
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (presentes.isEmpty()) {</span>
+<span class="fc" id="L189">            log.warn(&quot;No-show en cita {} ({} {} {}): sin presentes EN_SALA para adelantar. No se publica evento.&quot;,</span>
+<span class="fc" id="L190">                    citaId, cita.getEspecialidad(), hoy, cita.getHora());</span>
+<span class="fc" id="L191">            return cita;</span>
+        }
+
+        // El hueco empieza en la hora del no-show.
+        // Cada presente toma el hueco y deja su hora como nuevo hueco.
+<span class="fc" id="L196">        LocalTime horaLibre = cita.getHora();</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        for (Cita presente : presentes) {</span>
+<span class="fc" id="L198">            LocalTime horaOriginal = presente.getHora();</span>
+<span class="fc" id="L199">            presente.setHora(horaLibre);</span>
+<span class="fc" id="L200">            citaRepository.save(presente);</span>
+<span class="fc" id="L201">            log.info(&quot;Cascada: cita {} adelantada de {} a {}&quot;, presente.getId(), horaOriginal, horaLibre);</span>
+<span class="fc" id="L202">            horaLibre = horaOriginal;</span>
+        }
+        // horaLibre es ahora la hora del último presente, que quedó sin dueño.
+
+<span class="fc" id="L206">        log.info(&quot;Cascada completada. Última hora liberada: {} {} {}&quot;,</span>
+<span class="fc" id="L207">                cita.getEspecialidad(), hoy, horaLibre);</span>
+
+<span class="fc" id="L209">        rabbitTemplate.convertAndSend(RabbitConfig.COLA_CUPO_LIBERADO,</span>
+<span class="fc" id="L210">                CupoLiberadoEvent.builder()</span>
+<span class="fc" id="L211">                        .especialidad(cita.getEspecialidad())</span>
+<span class="fc" id="L212">                        .fechaCupo(hoy.toString())</span>
+<span class="fc" id="L213">                        .horaCupo(horaLibre.toString())</span>
+<span class="fc" id="L214">                        .origen(&quot;NO_SHOW_ADELANTO&quot;)</span>
+<span class="fc" id="L215">                        .prioridadMinima(&quot;CRITICA&quot;)</span>
+<span class="fc" id="L216">                        .pacientesExcluidos(List.of())</span>
+<span class="fc" id="L217">                        .build());</span>
+
+<span class="fc" id="L219">        return cita;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
