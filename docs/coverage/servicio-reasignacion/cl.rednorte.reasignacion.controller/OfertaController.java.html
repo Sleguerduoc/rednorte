@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OfertaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.reasignacion.controller</a> &gt; <span class="el_source">OfertaController.java</span></div><h1>OfertaController.java</h1><pre class="source lang-java linenums">package cl.rednorte.reasignacion.controller;
+
+import cl.rednorte.reasignacion.service.OfertaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.UUID;
+
+@RestController
+@RequestMapping(&quot;/ofertas&quot;)
+@RequiredArgsConstructor
+public class OfertaController {
+
+    private final OfertaService ofertaService;
+
+    /** Público — sin JWT. El token garantiza la identidad del receptor. */
+    @PostMapping(&quot;/confirmar&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; confirmar(@RequestParam UUID token) {
+<span class="fc" id="L21">        ofertaService.confirmar(token);</span>
+<span class="fc" id="L22">        return ResponseEntity.ok(Map.of(&quot;mensaje&quot;, &quot;Cita confirmada correctamente.&quot;));</span>
+    }
+
+    /** Público — sin JWT. */
+    @PostMapping(&quot;/rechazar&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; rechazar(@RequestParam UUID token) {
+<span class="fc" id="L28">        ofertaService.rechazar(token);</span>
+<span class="fc" id="L29">        return ResponseEntity.ok(Map.of(&quot;mensaje&quot;, &quot;Oferta rechazada. Se buscará el siguiente candidato.&quot;));</span>
+    }
+
+    /** Admin — requiere JWT. */
+    @PostMapping(&quot;/revisar-vencidas&quot;)
+    public ResponseEntity&lt;Map&lt;String, Integer&gt;&gt; revisarVencidas() {
+<span class="fc" id="L35">        int procesadas = ofertaService.revisarVencidas();</span>
+<span class="fc" id="L36">        return ResponseEntity.ok(Map.of(&quot;procesadas&quot;, procesadas));</span>
+    }
+
+    /** Admin — requiere JWT. Para el panel BFF de ofertas. */
+    @GetMapping
+    public java.util.List&lt;cl.rednorte.reasignacion.model.Oferta&gt; listar() {
+<span class="fc" id="L42">        return ofertaService.listarTodas();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

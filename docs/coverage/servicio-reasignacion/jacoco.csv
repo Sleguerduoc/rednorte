@@ -1,0 +1,9 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+,cl.rednorte.reasignacion.listener,CupoLiberadoListener,0,35,0,0,0,6,0,2,0,2
+,cl.rednorte.reasignacion.listener,CitaCanceladaListener,0,5,0,0,0,2,0,1,0,1
+,cl.rednorte.reasignacion.exception,GlobalExceptionHandler,0,47,0,2,0,9,0,6,0,5
+,cl.rednorte.reasignacion.service,ReasignacionService,0,91,0,0,0,32,0,1,0,1
+,cl.rednorte.reasignacion.service,OfertaService.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+,cl.rednorte.reasignacion.service,OfertaService,46,448,5,21,6,107,8,17,3,9
+,cl.rednorte.reasignacion.controller,ReasignacionController,0,4,0,0,0,1,0,1,0,1
+,cl.rednorte.reasignacion.controller,OfertaController,0,32,0,0,0,7,0,4,0,4

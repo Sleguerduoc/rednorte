@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.listaespera.service</a> &gt; <span class="el_source">MatchingService.java</span></div><h1>MatchingService.java</h1><pre class="source lang-java linenums">package cl.rednorte.listaespera.service;
+
+import cl.rednorte.listaespera.dto.CandidatoMatchingDto;
+import cl.rednorte.listaespera.model.*;
+import cl.rednorte.listaespera.repository.CitaRepository;
+import cl.rednorte.listaespera.repository.SolicitudRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Service
+@RequiredArgsConstructor
+public class MatchingService {
+
+    private final SolicitudRepository solicitudRepository;
+    private final CitaRepository citaRepository;
+
+    public List&lt;CandidatoMatchingDto&gt; obtenerCandidatos(
+            String especialidad,
+            PrioridadSolicitud prioridadMinima,
+            LocalDate fechaCupo,
+            List&lt;Long&gt; excluir) {
+
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        Set&lt;Long&gt; excluidos = excluir == null ? Set.of() : new HashSet&lt;&gt;(excluir);</span>
+
+        // --- Tipo A: solicitudes PENDIENTE de la especialidad ---
+<span class="fc" id="L31">        List&lt;CandidatoMatchingDto&gt; tipoA = solicitudRepository</span>
+<span class="fc" id="L32">                .findByEspecialidadAndEstado(especialidad, EstadoSolicitud.PENDIENTE)</span>
+<span class="fc" id="L33">                .stream()</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">                .filter(s -&gt; !excluidos.contains(s.getPacienteId()))</span>
+<span class="fc" id="L35">                .map(s -&gt; CandidatoMatchingDto.builder()</span>
+<span class="fc" id="L36">                        .pacienteId(s.getPacienteId())</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">                        .prioridad(s.getPrioridad() != null ? s.getPrioridad() : PrioridadSolicitud.NORMAL)</span>
+<span class="fc" id="L38">                        .especialidad(s.getEspecialidad())</span>
+<span class="fc" id="L39">                        .origen(OrigenCandidato.LISTA_ESPERA)</span>
+<span class="fc" id="L40">                        .fechaRegistroSolicitud(s.getFechaRegistro())</span>
+<span class="fc" id="L41">                        .solicitudId(s.getId())</span>
+<span class="fc" id="L42">                        .build())</span>
+<span class="fc" id="L43">                .collect(Collectors.toList());</span>
+
+        // --- Tipo B: citas PROGRAMADA con fecha posterior a fechaCupo ---
+<span class="fc" id="L46">        List&lt;CandidatoMatchingDto&gt; tipoB = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (fechaCupo != null) {</span>
+<span class="fc" id="L48">            List&lt;Cita&gt; citasFuturas = citaRepository</span>
+<span class="fc" id="L49">                    .findByEspecialidadAndEstadoAndFechaAfter(especialidad, EstadoCita.PROGRAMADA, fechaCupo);</span>
+
+            // Cargamos las solicitudes origen en una sola consulta
+<span class="fc" id="L52">            Set&lt;Long&gt; solicitudIds = citasFuturas.stream()</span>
+<span class="fc" id="L53">                    .map(Cita::getSolicitudId)</span>
+<span class="fc" id="L54">                    .collect(Collectors.toSet());</span>
+<span class="fc" id="L55">            Map&lt;Long, SolicitudListaEspera&gt; solicitudesById = solicitudRepository.findAllById(solicitudIds)</span>
+<span class="fc" id="L56">                    .stream()</span>
+<span class="fc" id="L57">                    .collect(Collectors.toMap(SolicitudListaEspera::getId, s -&gt; s));</span>
+
+<span class="fc" id="L59">            tipoB = citasFuturas.stream()</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                    .filter(c -&gt; !excluidos.contains(c.getPacienteId()))</span>
+<span class="fc" id="L61">                    .filter(c -&gt; solicitudesById.containsKey(c.getSolicitudId()))</span>
+<span class="fc" id="L62">                    .map(c -&gt; {</span>
+<span class="fc" id="L63">                        SolicitudListaEspera sol = solicitudesById.get(c.getSolicitudId());</span>
+<span class="fc" id="L64">                        return CandidatoMatchingDto.builder()</span>
+<span class="fc" id="L65">                                .pacienteId(c.getPacienteId())</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                                .prioridad(sol.getPrioridad() != null ? sol.getPrioridad() : PrioridadSolicitud.NORMAL)</span>
+<span class="fc" id="L67">                                .especialidad(c.getEspecialidad())</span>
+<span class="fc" id="L68">                                .origen(OrigenCandidato.CITA_FUTURA)</span>
+<span class="fc" id="L69">                                .fechaRegistroSolicitud(sol.getFechaRegistro())</span>
+<span class="fc" id="L70">                                .citaId(c.getId())</span>
+<span class="fc" id="L71">                                .fechaCita(c.getFecha())</span>
+<span class="fc" id="L72">                                .horaCita(c.getHora())</span>
+<span class="fc" id="L73">                                .build();</span>
+                    })
+<span class="fc" id="L75">                    .collect(Collectors.toList());</span>
+        }
+
+        // --- Combinar, filtrar por prioridad mínima y ordenar ---
+<span class="fc" id="L79">        return Stream.concat(tipoA.stream(), tipoB.stream())</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">                .filter(c -&gt; prioridadMinima == null</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">                        || c.getPrioridad().ordinal() &lt;= prioridadMinima.ordinal())</span>
+<span class="fc" id="L82">                .sorted(Comparator</span>
+<span class="fc" id="L83">                        .comparingInt((CandidatoMatchingDto c) -&gt; c.getPrioridad().ordinal())</span>
+<span class="fc" id="L84">                        .thenComparing(CandidatoMatchingDto::getFechaRegistroSolicitud,</span>
+<span class="fc" id="L85">                                Comparator.nullsLast(Comparator.naturalOrder())))</span>
+<span class="fc" id="L86">                .collect(Collectors.toList());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>

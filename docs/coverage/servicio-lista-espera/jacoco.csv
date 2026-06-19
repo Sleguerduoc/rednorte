@@ -1,0 +1,8 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+,cl.rednorte.listaespera.exception,GlobalExceptionHandler,4,71,4,6,0,17,4,4,0,3
+,cl.rednorte.listaespera.service,CitaService,66,386,3,19,15,100,8,16,5,8
+,cl.rednorte.listaespera.service,MatchingService,4,189,3,13,0,48,3,14,0,9
+,cl.rednorte.listaespera.service,SolicitudService,22,88,2,2,6,26,3,4,2,3
+,cl.rednorte.listaespera.controller,CitaController,0,36,0,0,0,7,0,7,0,7
+,cl.rednorte.listaespera.controller,MatchingController,0,8,0,0,0,1,0,1,0,1
+,cl.rednorte.listaespera.controller,SolicitudController,0,18,0,0,0,4,0,3,0,3
