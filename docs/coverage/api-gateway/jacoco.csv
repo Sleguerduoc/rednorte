@@ -1,0 +1,11 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+,cl.rednorte.gateway.bff.service,BffService,8,423,2,14,0,100,2,27,0,21
+,cl.rednorte.gateway.auth,JwtUtil,0,53,0,0,0,16,0,4,0,4
+,cl.rednorte.gateway.auth,UserService,0,116,0,6,0,35,0,9,0,6
+,cl.rednorte.gateway.auth,AuthController,0,34,0,0,0,10,0,2,0,2
+,cl.rednorte.gateway.auth,JwtAuthFilter,4,108,8,14,0,25,7,5,0,1
+,cl.rednorte.gateway.bff.controller,BffController,0,21,0,0,0,5,0,5,0,5
+,cl.rednorte.gateway.bff.client,NotificacionesClient,0,22,0,0,0,8,0,3,0,3
+,cl.rednorte.gateway.bff.client,PacientesClient,0,22,0,0,0,8,0,3,0,3
+,cl.rednorte.gateway.bff.client,ReasignacionClient,0,37,0,0,0,13,0,5,0,5
+,cl.rednorte.gateway.bff.client,ListaEsperaClient,0,51,0,0,0,13,0,6,0,6

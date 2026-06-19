@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BffController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">cl.rednorte.gateway.bff.controller</a> &gt; <span class="el_source">BffController.java</span></div><h1>BffController.java</h1><pre class="source lang-java linenums">package cl.rednorte.gateway.bff.controller;
+
+import cl.rednorte.gateway.bff.dto.CitaCompletaResponse;
+import cl.rednorte.gateway.bff.dto.DashboardResponse;
+import cl.rednorte.gateway.bff.dto.OfertaResponse;
+import cl.rednorte.gateway.bff.dto.SolicitudCompletaResponse;
+import cl.rednorte.gateway.bff.service.BffService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@RestController
+@RequestMapping(&quot;/bff&quot;)
+@RequiredArgsConstructor
+public class BffController {
+
+    private final BffService bffService;
+
+    // ── Endpoints existentes ─────────────────────────────────────────────────
+
+    @GetMapping(&quot;/dashboard&quot;)
+    public Mono&lt;DashboardResponse&gt; getDashboard() {
+<span class="fc" id="L27">        return bffService.getDashboard();</span>
+    }
+
+    @GetMapping(&quot;/lista-espera/completa&quot;)
+    public Flux&lt;SolicitudCompletaResponse&gt; getListaCompletaConPacientes() {
+<span class="fc" id="L32">        return bffService.getListaCompletaConPacientes();</span>
+    }
+
+    // ── Nuevos endpoints (Fase 8A) ───────────────────────────────────────────
+
+    /**
+     * Citas de un día enriquecidas con nombre del paciente.
+     * Ejemplo: GET /bff/sala-del-dia?fecha=2026-06-14
+     */
+    @GetMapping(&quot;/sala-del-dia&quot;)
+    public Flux&lt;CitaCompletaResponse&gt; getSalaDelDia(@RequestParam String fecha) {
+<span class="fc" id="L43">        return bffService.getSalaDelDia(fecha);</span>
+    }
+
+    /**
+     * Solicitudes en estado PENDIENTE con nombre del paciente.
+     * Para el panel de lista de espera del admin/doctor.
+     */
+    @GetMapping(&quot;/lista-espera&quot;)
+    public Flux&lt;SolicitudCompletaResponse&gt; getListaEsperaPendiente() {
+<span class="fc" id="L52">        return bffService.getListaEsperaPendiente();</span>
+    }
+
+    /**
+     * Todas las ofertas con nombre del paciente.
+     * Para el panel de ofertas del admin.
+     */
+    @GetMapping(&quot;/ofertas&quot;)
+    public Flux&lt;OfertaResponse&gt; getOfertas() {
+<span class="fc" id="L61">        return bffService.getOfertas();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
