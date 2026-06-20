@@ -8,3 +8,4 @@ node_modules/
 dist/
 build/
 AGENTS.MD
+limpiar_claude_git.sh
